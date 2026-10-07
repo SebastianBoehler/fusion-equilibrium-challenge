@@ -14,8 +14,6 @@ def kinetic_features(row: dict) -> np.ndarray:
         ne = np.asarray(row[f"thomson_{system}_ne"], dtype=float)
         if te.shape != ne.shape or te.shape[0] != len(times) or len(times) == 0:
             raise ValueError(f"Invalid Thomson {system} profiles")
-        if np.any(np.diff(times) <= 0):
-            raise ValueError(f"Invalid Thomson {system} timestamps")
         summaries = []
         for values in (te, ne, te * ne):
             physical = np.where(np.isfinite(values), np.maximum(values, 0), np.nan)
@@ -26,7 +24,14 @@ def kinetic_features(row: dict) -> np.ndarray:
             valid = np.isfinite(times) & np.isfinite(values)
             if valid.sum() == 0:
                 raise ValueError(f"Undefined Thomson {system} summary")
-            aligned.append(np.interp(row["efit_times"], times[valid], values[valid]))
+            selected = values[valid]
+            if np.all(selected == selected[0]):
+                # A measured constant has no time variation, including zero diagnostics.
+                aligned.append(np.full(len(row["efit_times"]), selected[0]))
+            else:
+                if np.any(np.diff(times[valid]) <= 0):
+                    raise ValueError(f"Invalid Thomson {system} timestamps")
+                aligned.append(np.interp(row["efit_times"], times[valid], selected))
         columns.append(np.column_stack(aligned))
     result = np.column_stack(columns)
     if not np.isfinite(result).all():
