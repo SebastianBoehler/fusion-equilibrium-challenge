@@ -22,9 +22,10 @@ Code: `participant/`. Frozen data/source/job manifests and results: ignored
 `run_data/`. This first model deliberately supports DIII-D only. Cross-machine
 geometry features are the next experiment; no placeholder MAST predictions.
 
-Completed local checks are in `RUNS.md`. A five-neighbor comparison reached
-S = 0.5183 versus ridge's 0.2794 on the same two held-out shots. These tiny
-checks establish an executable pipeline, not competition-level accuracy.
+Completed local checks are in `RUNS.md`. The selected first-submission model
+uses quadratic current interactions and Thomson profile summaries. On eight
+held-out shots it reached S = 0.784501 at upload precision, trained on 64
+separate shots. This remains a local estimate, not an official leaderboard score.
 
 Run a frozen manifest:
 
@@ -32,6 +33,13 @@ Run a frozen manifest:
 python -m participant.smoke --manifest run_data/smoke-001/data.json \
   --out run_data/smoke-001/result
 ```
+
+The broader frozen split is `protocols/iteration-002-data.json`.
+`participant.kinetic_compare` checks raw target redaction, saved-model reload,
+and the exact upload precision. `participant.public_inputs` prepares the public
+inputs; `participant.submit_build` verifies their hashes, official stream order,
+all 874 shots, every array shape, and finite outputs before writing the upload.
+Public inputs never enter fitting, normalization, or candidate selection.
 
 Development closes 18 October 2026 at 00:00 UTC. Final closes 26 October at
 00:00 UTC. Challenge 2 requires DIII-D composite S >= 0.85 and predictions for
