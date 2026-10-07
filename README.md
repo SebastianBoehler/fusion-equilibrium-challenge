@@ -25,7 +25,8 @@ geometry features are the next experiment; no placeholder MAST predictions.
 Completed local checks are in `RUNS.md`. The selected first-submission model
 uses quadratic current interactions and Thomson profile summaries. On eight
 held-out shots it reached S = 0.784501 at upload precision, trained on 64
-separate shots. This remains a local estimate, not an official leaderboard score.
+separate shots. A fresh eight-shot check scored 0.514215. Codabench accepted
+submission **967617** on 7 October 2026 at 23:15 Berlin; scoring remains pending.
 
 Run a frozen manifest:
 
@@ -40,6 +41,14 @@ and the exact upload precision. `participant.public_inputs` prepares the public
 inputs; `participant.submit_build` verifies their hashes, official stream order,
 all 874 shots, every array shape, and finite outputs before writing the upload.
 Public inputs never enter fitting, normalization, or candidate selection.
+
+The next frozen run trains the same model on 256 shots and reports the two
+validation groups separately:
+
+```sh
+python -m participant.scale --manifest protocols/scale-256-data.json \
+  --cache run_data/scale-256/data --out run_data/scale-256/result
+```
 
 Development closes 18 October 2026 at 00:00 UTC. Final closes 26 October at
 00:00 UTC. Challenge 2 requires DIII-D composite S >= 0.85 and predictions for
