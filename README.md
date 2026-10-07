@@ -22,6 +22,10 @@ Code: `participant/`. Frozen data/source/job manifests and results: ignored
 `run_data/`. This first model deliberately supports DIII-D only. Cross-machine
 geometry features are the next experiment; no placeholder MAST predictions.
 
+Completed local checks are in `RUNS.md`. A five-neighbor comparison reached
+S = 0.5183 versus ridge's 0.2794 on the same two held-out shots. These tiny
+checks establish an executable pipeline, not competition-level accuracy.
+
 Run a frozen manifest:
 
 ```sh
