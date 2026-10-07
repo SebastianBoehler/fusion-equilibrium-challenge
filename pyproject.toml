@@ -1,0 +1,22 @@
+[project]
+name = "fusion-equilibrium-challenge"
+version = "0.1.0"
+description = "Participant models for the NeurIPS 2026 Fusion Equilibrium Challenge"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy==2.4.6",
+    "pyarrow==24.0.0",
+    "scipy==1.17.1",
+    "scikit-image==0.26.0",
+]
+
+[tool.uv]
+package = false
+
+# Resolve lockfile for the platforms hackathoners typically use.
+required-environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "sys_platform == 'win32' and platform_machine == 'AMD64'",
+]
