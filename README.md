@@ -25,8 +25,10 @@ geometry features are the next experiment; no placeholder MAST predictions.
 Completed local checks are in `RUNS.md`. The selected first-submission model
 uses quadratic current interactions and Thomson profile summaries. On eight
 held-out shots it reached S = 0.784501 at upload precision, trained on 64
-separate shots. A fresh eight-shot check scored 0.514215. Codabench accepted
-submission **967617** on 7 October 2026 at 23:15 Berlin; scoring remains pending.
+separate shots. A fresh eight-shot check scored 0.514215. Codabench submission
+**967617** scored **0.758805**, rank **88 of 96** at 23:32 Berlin on 7 October.
+The 256-shot run improved the two validation groups to 0.902553 and 0.864606.
+Its stronger checkpoint is being packaged for a second DIII-D submission.
 
 Run a frozen manifest:
 
