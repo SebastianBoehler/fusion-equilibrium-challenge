@@ -8,16 +8,21 @@ from .data import features, targets
 
 
 class RidgeModel:
+    regularization = 1.0
+
     def fit(self, rows: list[dict]) -> "RidgeModel":
         x = np.concatenate([features(row) for row in rows])
         y = np.concatenate([targets(row) for row in rows])
+        return self.fit_arrays(x, y)
+
+    def fit_arrays(self, x: np.ndarray, y: np.ndarray) -> "RidgeModel":
         self.mean = x.mean(axis=0)
         self.scale = x.std(axis=0)
         self.scale[self.scale == 0] = 1.0
         x = (x - self.mean) / self.scale
         self.weights = np.empty((x.shape[1] + 1, y.shape[1]))
         x = np.column_stack([x, np.ones(len(x))])
-        penalty = np.eye(x.shape[1])
+        penalty = np.eye(x.shape[1]) * self.regularization
         penalty[-1, -1] = 0.0
         # Flux labels share one finite mask; scalar labels are masked independently.
         valid = np.isfinite(y[:, :-2]).all(axis=1)
@@ -35,7 +40,10 @@ class RidgeModel:
     def predict(self, row: dict) -> dict:
         if row["source"] != "DIII-D":
             raise ValueError("This first baseline supports DIII-D only")
-        x = (features(row) - self.mean) / self.scale
+        return self.predict_inputs(features(row))
+
+    def predict_inputs(self, inputs: np.ndarray) -> dict:
+        x = (inputs - self.mean) / self.scale
         y = np.column_stack([x, np.ones(len(x))]) @ self.weights
         if not np.isfinite(y).all():
             raise ValueError("Nonfinite predictions")

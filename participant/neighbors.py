@@ -12,6 +12,9 @@ class NeighborModel:
     def fit(self, rows: list[dict]) -> "NeighborModel":
         x = np.concatenate([features(row) for row in rows])
         y = np.concatenate([targets(row) for row in rows])
+        return self.fit_arrays(x, y)
+
+    def fit_arrays(self, x: np.ndarray, y: np.ndarray) -> "NeighborModel":
         valid = np.isfinite(y).all(axis=1)
         x, self.y = x[valid], y[valid]
         if len(x) < 5:
@@ -26,7 +29,10 @@ class NeighborModel:
     def predict(self, row: dict) -> dict:
         if row["source"] != "DIII-D":
             raise ValueError("The neighbor baseline supports DIII-D only")
-        x = (features(row) - self.mean) / self.scale
+        return self.predict_inputs(features(row))
+
+    def predict_inputs(self, inputs: np.ndarray) -> dict:
+        x = (inputs - self.mean) / self.scale
         distances, indices = self.tree.query(x, k=5, workers=2)
         weights = 1 / np.maximum(distances, 1e-12)
         weights /= weights.sum(axis=1, keepdims=True)

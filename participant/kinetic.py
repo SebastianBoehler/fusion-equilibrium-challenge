@@ -1,0 +1,41 @@
+"""Current interactions augmented with measured electron pressure profiles."""
+
+import numpy as np
+
+from .data import features
+from .quadratic import QuadraticModel
+
+
+def kinetic_features(row: dict) -> np.ndarray:
+    columns = [features(row)]
+    for system in ("core", "edge"):
+        times = np.asarray(row[f"thomson_{system}_times"], dtype=float)
+        te = np.asarray(row[f"thomson_{system}_Te"], dtype=float)
+        ne = np.asarray(row[f"thomson_{system}_ne"], dtype=float)
+        if te.shape != ne.shape or te.shape[0] != len(times) or len(times) == 0:
+            raise ValueError(f"Invalid Thomson {system} profiles")
+        if np.any(np.diff(times) <= 0):
+            raise ValueError(f"Invalid Thomson {system} timestamps")
+        summaries = []
+        for values in (te, ne, te * ne):
+            physical = np.where(np.isfinite(values), np.maximum(values, 0), np.nan)
+            summaries.extend(np.nanquantile(physical, [0.5, 0.9], axis=1))
+        matrix = np.column_stack(summaries)
+        aligned = []
+        for values in matrix.T:
+            valid = np.isfinite(times) & np.isfinite(values)
+            if valid.sum() == 0:
+                raise ValueError(f"Undefined Thomson {system} summary")
+            aligned.append(np.interp(row["efit_times"], times[valid], values[valid]))
+        columns.append(np.column_stack(aligned))
+    result = np.column_stack(columns)
+    if not np.isfinite(result).all():
+        raise ValueError("Nonfinite kinetic model inputs")
+    return result
+
+
+class KineticModel(QuadraticModel):
+    def predict(self, row: dict) -> dict:
+        if row["source"] != "DIII-D":
+            raise ValueError("The kinetic model supports DIII-D only")
+        return self.predict_inputs(kinetic_features(row))
