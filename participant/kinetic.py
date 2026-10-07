@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .data import features
+from .data import features, targets
 from .quadratic import QuadraticModel
 
 
@@ -35,6 +35,10 @@ def kinetic_features(row: dict) -> np.ndarray:
 
 
 class KineticModel(QuadraticModel):
+    def fit(self, rows: list[dict]) -> "KineticModel":
+        return self.fit_arrays(np.concatenate([kinetic_features(row) for row in rows]),
+                               np.concatenate([targets(row) for row in rows]))
+
     def predict(self, row: dict) -> dict:
         if row["source"] != "DIII-D":
             raise ValueError("The kinetic model supports DIII-D only")

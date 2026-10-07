@@ -6,6 +6,21 @@ from pathlib import Path
 import numpy as np
 
 from .data import features, read_shot, targets
+from .kinetic import kinetic_features
+
+
+def kinetic_inputs(entries: list[dict], revision: str, cache: Path) -> list[np.ndarray]:
+    inputs = []
+    for entry in entries:
+        row = read_shot(entry, revision, cache)
+        values = kinetic_features(row)
+        redacted = {k: v for k, v in row.items()
+                    if not k.startswith("efit_") or k == "efit_times"}
+        redacted.pop("magnetics_dsep", None)
+        np.testing.assert_array_equal(values, kinetic_features(redacted))
+        np.testing.assert_array_equal(features(row), features(redacted))
+        inputs.append(values)
+    return inputs
 
 
 def prepare(entry: dict, revision: str, cache: Path) -> dict:

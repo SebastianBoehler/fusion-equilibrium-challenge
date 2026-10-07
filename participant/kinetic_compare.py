@@ -1,4 +1,4 @@
-"""A bounded kinetic-feature comparison on the frozen 64/8 shot split."""
+"""A bounded kinetic-feature comparison on a frozen shot split."""
 
 import argparse
 import json
@@ -7,15 +7,16 @@ import time
 
 import numpy as np
 
-from .data import features, read_shot
-from .kinetic import KineticModel, kinetic_features
-from .prepared import load_entries
+from .kinetic import KineticModel
+from .prepared import kinetic_inputs, load_entries
 from .quadratic import QuadraticModel
 from .score import composite
 from .scalar_trees import ScalarTreeModel
+from .physical import PhysicalModel, PhysicalRegularizedModel
 
 MODELS = {"quadratic": QuadraticModel, "kinetic": KineticModel,
-          "scalar-trees": ScalarTreeModel}
+          "scalar-trees": ScalarTreeModel, "physical": PhysicalModel,
+          "physical-strong": PhysicalRegularizedModel}
 
 
 def main() -> None:
@@ -31,18 +32,8 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     rows = {s: load_entries(manifest[s], manifest["revision"], args.cache)
             for s in ("train", "heldout")}
-    kinetic = {}
-    for split in rows:
-        kinetic[split] = []
-        for entry in manifest[split]:
-            row = read_shot(entry, manifest["revision"], args.cache)
-            inputs = kinetic_features(row)
-            redacted = {k: v for k, v in row.items()
-                        if not k.startswith("efit_") or k == "efit_times"}
-            redacted.pop("magnetics_dsep", None)
-            np.testing.assert_array_equal(inputs, kinetic_features(redacted))
-            np.testing.assert_array_equal(features(row), features(redacted))
-            kinetic[split].append(inputs)
+    kinetic = {s: kinetic_inputs(manifest[s], manifest["revision"], args.cache)
+               for s in rows}
     y = np.concatenate([row["targets"] for row in rows["train"]])
     results = {}
     for name in args.models:
