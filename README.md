@@ -19,8 +19,7 @@ under `vendor/fusion_starter/`; its revision is recorded in `VENDORED.md`.
 - Galvani CPU job: four CPUs, 16 GiB, no GPU, hard wall-time 20 minutes.
 
 Code: `participant/`. Frozen data/source/job manifests and results: ignored
-`run_data/`. This first model deliberately supports DIII-D only. Cross-machine
-geometry features are the next experiment; no placeholder MAST predictions.
+`run_data/`. This first model deliberately supports DIII-D only. Challenge 1 remains the main campaign. MAST is a separate future branch.
 
 Completed local checks are in `RUNS.md`. The selected first-submission model
 uses quadratic current interactions and Thomson profile summaries. On eight
@@ -46,7 +45,7 @@ inputs; `participant.submit_build` verifies their hashes, official stream order,
 all 874 shots, every array shape, and finite outputs before writing the upload.
 Public inputs never enter fitting, normalization, or candidate selection.
 
-The next frozen run trains the same model on 256 shots and reports the two
+The completed 256-shot run trains the same model and reports the two
 validation groups separately:
 
 ```sh
