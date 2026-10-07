@@ -34,7 +34,8 @@ def array_value(value: pa.Scalar):
     return values.to_numpy(zero_copy_only=False).reshape(shape)
 
 
-def read_shot(entry: dict, revision: str, cache: Path) -> dict:
+def read_shot(entry: dict, revision: str, cache: Path,
+              columns: tuple[str, ...] | None = None) -> dict:
     cache.mkdir(parents=True, exist_ok=True)
     path = cache / Path(entry["path"]).name
     if not path.exists():
@@ -45,7 +46,7 @@ def read_shot(entry: dict, revision: str, cache: Path) -> dict:
     digest = sha256(path.read_bytes()).hexdigest()
     if digest != entry["sha256"]:
         raise ValueError(f"Dataset hash mismatch: {entry['path']}")
-    table = pq.read_table(path)
+    table = pq.read_table(path, columns=list(columns) if columns is not None else None)
     if len(table) != 1:
         raise ValueError("Expected one released shot")
     row = {name: array_value(table[name][0]) for name in table.column_names}

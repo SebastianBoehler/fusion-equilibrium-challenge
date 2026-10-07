@@ -6,8 +6,14 @@ import json
 import numpy as np
 
 from .artifacts import code_digest, digest, identity, write_json
-from .data import read_shot, targets
+from .data import SCALARS, SIGNALS, read_shot, targets
 from .kinetic import kinetic_features
+
+PREPARE_COLUMNS = ('source', 'efit_times', 'efit_psirz', *SCALARS,
+                   'magnetics_time', 'magnetics_plasma_current_times',
+                   *(f'magnetics_{signal}' for signal in SIGNALS),
+                   *(f'thomson_{system}_{value}' for system in ('core', 'edge')
+                     for value in ('times', 'Te', 'ne')))
 
 FEATURE_FILES = [Path('participant') / name for name in
                  ('data.py', 'kinetic.py', 'cache.py', 'artifacts.py')]
@@ -27,7 +33,7 @@ def prepare_shot(entry: dict, revision: str, raw: Path, cache: Path) -> dict:
     directory = cache / key
     receipt = directory / 'receipt.json'
     if not receipt.exists():
-        row = read_shot(entry, revision, raw)
+        row = read_shot(entry, revision, raw, columns=PREPARE_COLUMNS)
         x, y = kinetic_features(row), targets(row)
         redacted = {k: v for k, v in row.items()
                     if not k.startswith('efit_') or k == 'efit_times'}
