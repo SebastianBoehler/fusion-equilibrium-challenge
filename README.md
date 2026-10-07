@@ -29,7 +29,8 @@ separate shots. A fresh eight-shot check scored 0.514215. Codabench submission
 **967617** scored **0.758805**, rank **88 of 96** at 23:32 Berlin on 7 October.
 The 256-shot run improved the two validation groups to 0.902553 and 0.864606.
 Its stronger checkpoint is submitted as **967643**, accepted at 23:50 Berlin.
-The second official score remains pending.
+The second official score is **0.916864**, rank **74 of 96** at 00:22 Berlin
+on 8 October. The displayed top-five cutoff is **0.9963**.
 
 Run a frozen manifest:
 
@@ -56,3 +57,16 @@ python -m participant.scale --manifest protocols/scale-256-data.json \
 Development closes 18 October 2026 at 00:00 UTC. Final closes 26 October at
 00:00 UTC. Challenge 2 requires DIII-D composite S >= 0.85 and predictions for
 both machines. Podium authorship/talks are decided by final verification.
+
+The broader campaign is frozen in `protocols/breadth-004.json`. The generator
+uses the complete verified training catalog to reserve 256 development shots
+and 128 locked confirmation shots. The old 16 shots are regression checks.
+The first one-hour CPU pilot compares 256 and 1,024 shots with fixed alpha and
+fixed alpha/N. Float32 target storage is checked lossless against the release;
+features stay float64. Fitting and scoring stream one shot at a time.
+
+Verify the new numerical and scoring path on real released shots:
+
+```sh
+OPENBLAS_NUM_THREADS=4 python -m tests.verify_pipeline
+```
