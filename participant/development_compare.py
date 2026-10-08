@@ -18,6 +18,7 @@ from .kinetic import KineticModel
 from .reference_cache import scorer_identity
 from .scalar_heads import ScalarHeads
 from .scalar_score import compare
+from .scoring_import import import_state
 
 
 def main():
@@ -27,6 +28,7 @@ def main():
     parser.add_argument('--raw', type=Path, required=True)
     parser.add_argument('--cache', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--resume-from', type=Path)
     args = parser.parse_args()
     started = time.monotonic()
     protocol = json.loads(args.manifest.read_text())
@@ -52,6 +54,10 @@ def main():
             raise ValueError(f'Pilot checkpoint hash mismatch: {name}')
         models[name] = KineticModel.load(path)
     records = prepare(protocol['development'], protocol['revision'], args.raw, args.cache / 'features')
+    imported = None
+    if args.resume_from is not None:
+        imported = import_state(args.resume_from, records, models, args.cache / 'references',
+                                args.out / 'breadth', args.manifest)
     breadth_scores = score_models(records, models, args.cache / 'references', args.out / 'breadth')
     flux_name = max(breadth_scores, key=lambda name: breadth_scores[name]['S'])
     heads = {'ridge': ScalarHeads(models[flux_name], 'ridge')}
@@ -95,6 +101,8 @@ def main():
               'eligible_for_development_submission': eligible,
               'eligibility_rule': 'Full development S gain >= 0.002 and both old regression groups improve',
               'locked_confirmation_read': 0, 'checkpoint_reload': True,
+              'resumed_from_job_id': imported['previous_job_id'] if imported else None,
+              'scoring_reuse': json.loads((args.out / 'breadth/scores.json').read_text()),
               'elapsed_seconds': time.monotonic() - started,
               'peak_rss_native_units': resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
               'peak_rss_unit': 'KiB' if platform.system() == 'Linux' else 'bytes',

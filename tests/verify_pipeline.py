@@ -48,6 +48,8 @@ def main():
                                 for k, v in prediction.items()})
         original = composite(rows, predictions)
         assert cached['blocked'] == original, (cached['blocked'], original)
+        from tests.scoring_resume_checks import verify
+        verify(validation, reloaded, root, cached)
         # A warm reference cache must give the same score without rebuilding contours.
         from unittest.mock import patch
         with patch('participant.reference_cache.official.build_reference',

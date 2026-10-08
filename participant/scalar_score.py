@@ -8,6 +8,7 @@ import numpy as np
 from .artifacts import write_json
 from .cache import arrays
 from .score import official
+from .scoring_state import decode
 
 
 def compare(records: list[dict], heads: dict, frozen_flux: Path, out: Path) -> dict:
@@ -25,11 +26,7 @@ def compare(records: list[dict], heads: dict, frozen_flux: Path, out: Path) -> d
             prediction = {k: v.astype(np.float32) for k, v in head.predict_scalars(x).items()}
             np.savez_compressed(out / f'{name}-{index:04d}.npz', **prediction)
             with np.load(out / f'{name}-{index:04d}.npz', allow_pickle=False) as saved:
-                part = dict(receipt['prediction_statistics'])
-                part['ss_res_psi'] = {float(k): v for k, v in part['ss_res_psi'].items()}
-                part['shot_r2_psi'] = {float(k): v for k, v in part['shot_r2_psi'].items()}
-                for key in ('ss_res_cons', 'cons_frames', 'cons_fails'):
-                    part[key] = np.asarray(part[key])
+                part = decode(receipt['prediction_statistics'])
                 residuals = []
                 for column, key in zip((-2, -1), ('q95', 'betaN')):
                     valid = np.isfinite(y[:, column])
