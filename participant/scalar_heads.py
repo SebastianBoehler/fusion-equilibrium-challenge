@@ -10,6 +10,26 @@ from .cache import arrays
 from .kinetic import KineticModel
 
 
+def training_arrays(records: list[dict]) -> tuple[np.ndarray, np.ndarray]:
+    if not records:
+        raise ValueError('Nonempty scalar training records required')
+    frames = sum(record['frames'] for record in records)
+    x = np.empty((frames, 33), dtype=np.float64)
+    y = np.empty((frames, 2), dtype=np.float64)
+    start = 0
+    for record in records:
+        inputs, targets = arrays(record)
+        try:
+            stop = start + record['frames']
+            x[start:stop] = inputs
+            y[start:stop] = targets[:, -2:]
+            start = stop
+        finally:
+            inputs._mmap.close()
+            targets._mmap.close()
+    return x, y
+
+
 class ScalarHeads:
     def __init__(self, flux: KineticModel, method: str):
         self.flux, self.method = flux, method
@@ -18,9 +38,7 @@ class ScalarHeads:
     def fit(self, records: list[dict]) -> 'ScalarHeads':
         if self.method not in ('extra-trees', 'gradient-boosting'):
             raise ValueError('Unknown scalar method')
-        inputs, targets = zip(*(arrays(record) for record in records))
-        x = np.concatenate(inputs)
-        y = np.concatenate([values[:, -2:] for values in targets]).astype(np.float64)
+        x, y = training_arrays(records)
         for index in range(2):
             valid = np.isfinite(y[:, index])
             if valid.sum() < 100:

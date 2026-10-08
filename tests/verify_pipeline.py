@@ -24,6 +24,8 @@ def main():
         root = Path(temporary)
         records = [prepare_shot(e, manifest['revision'], raw, root / 'features') for e in entries]
         train = records[:len(manifest['train'])]
+        from tests.scalar_file_checks import verify as verify_scalar_files
+        verify_scalar_files(train)
         x, y = zip(*(arrays(r) for r in train))
         dense = KineticModel().fit_arrays(np.concatenate(x), np.concatenate(y).astype(float))
         normalizer, statistics = fit_statistics(train)
