@@ -59,6 +59,10 @@ def main():
         imported = import_state(args.resume_from, records, models, args.cache / 'references',
                                 args.out / 'breadth', args.manifest)
     breadth_scores = score_models(records, models, args.cache / 'references', args.out / 'breadth')
+    if imported and imported['complete_breadth']:
+        previous_scores = json.loads((args.resume_from / 'result/breadth/scores.json').read_text())
+        if breadth_scores != previous_scores['scores']:
+            raise ValueError('Complete breadth scores failed exact reproduction')
     flux_name = max(breadth_scores, key=lambda name: breadth_scores[name]['S'])
     heads = {'ridge': ScalarHeads(models[flux_name], 'ridge')}
     training = prepare(protocol['train'][:1024], protocol['revision'], args.raw, args.cache / 'features')

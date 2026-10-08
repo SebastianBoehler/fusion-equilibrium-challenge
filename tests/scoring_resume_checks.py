@@ -100,6 +100,30 @@ def verify_import(records, models, cache, out, root, original):
         with patch('participant.cached_score.official.score_shot',
                    side_effect=AssertionError('Imported scoring repeated')):
             assert score_models(records, models, new_cache, new_out) == original
+    context = json.loads((out / 'scoring-context.json').read_text())
+    context['scorer_sha256'] = old_scorer
+    write_json(previous / 'result/breadth/scoring-context.json', context)
+    write_json(previous / 'result/breadth/scores.json',
+               {'context_sha256': identity(context), 'scorer_sha256': old_scorer, 'scores': original})
+    write_json(previous / 'outcome.json', {**spec, 'status': 'failed', 'error': 'FAILED exit=1:0'})
+    for path in (out / 'blocked').glob('*-statistics.json'):
+        payload = {k: v for k, v in json.loads(path.read_text()).items() if k != 'statistics_sha256'}
+        payload['context_sha256'] = identity(context)
+        write_json(previous / 'result/breadth/blocked' / path.name,
+                   {**payload, 'statistics_sha256': identity(payload)})
+    sealed_out = root / 'sealed-import'
+    imported = import_state(previous, records, models, new_cache, sealed_out, manifest)
+    assert imported['complete_breadth'] and len(imported['statistics']) == len(records)
+    with patch('participant.cached_score.official.score_shot',
+               side_effect=AssertionError('Complete scoring repeated')):
+        assert score_models(records, models, new_cache, sealed_out) == original
+    bad_statistic = previous / 'result/breadth/blocked/0000-statistics.json'
+    clean = bad_statistic.read_bytes()
+    value = json.loads(clean)
+    value['prediction_statistics']['lcfs_frames'] += 1
+    write_json(bad_statistic, value)
+    rejects(lambda: import_state(previous, records, models, new_cache, root / 'bad-sealed', manifest))
+    bad_statistic.write_bytes(clean)
     rejects(lambda: import_state(previous, records[:1], models, new_cache, root / 'wrong-count', manifest))
     frozen = previous / 'repo/participant/reference_cache.py'
     frozen.write_text(frozen.read_text() + '\n# damaged fixture\n')

@@ -1,4 +1,4 @@
-"""Relocate verified legacy scoring artifacts without changing frozen jobs."""
+"""Relocate verified frozen scoring artifacts without changing their numerical values."""
 
 import json
 from pathlib import Path
@@ -11,14 +11,34 @@ from .reference_cache import scorer_identity
 from .score import official
 
 
+def completed_context(previous: Path, records: list[dict], models: dict,
+                      scorer: str) -> dict:
+    context = json.loads((previous / 'result/breadth/scoring-context.json').read_text())
+    scores = json.loads((previous / 'result/breadth/scores.json').read_text())
+    if scores['context_sha256'] != identity(context) or context['scorer_sha256'] != scorer \
+            or scores['scorer_sha256'] != scorer:
+        raise ValueError('Previous complete scoring context identity mismatch')
+    if context['sources'] != [r['identity'] for r in records] \
+            or context['targets'] != [r['files']['targets'] for r in records]:
+        raise ValueError('Previous complete scoring population/order changed')
+    if set(context['predictions']) != set(models) or set(scores['scores']) != set(models):
+        raise ValueError('Previous complete scoring model population changed')
+    for name in models:
+        if scores['scores'][name]['n_shots'] != len(records) \
+                or scores['scores'][name]['n_shots_missing'] != 0:
+            raise ValueError('Previous scoring is incomplete')
+    return context
+
+
 def import_state(previous: Path, records: list[dict], models: dict,
                  cache: Path, out: Path, manifest: Path) -> dict:
     if out.exists():
-        raise ValueError('Legacy scoring import requires a fresh destination')
+        raise ValueError('Scoring import requires a fresh destination')
     spec = json.loads((previous / 'spec.json').read_text())
     outcome = json.loads((previous / 'outcome.json').read_text())
-    if outcome['status'] != 'failed' or 'TIMEOUT' not in outcome['error']:
-        raise ValueError('A frozen timed-out development run is required')
+    complete = (previous / 'result/breadth/scores.json').exists()
+    if outcome['status'] != 'failed' or (not complete and 'TIMEOUT' not in outcome['error']):
+        raise ValueError('A frozen failed run with complete scoring or timed-out legacy state is required')
     for key in ('source_sha256', 'script_sha256', 'submission_nonce', 'task_id'):
         if outcome[key] != spec[key]:
             raise ValueError('Previous controller/spec identity mismatch')
@@ -54,6 +74,8 @@ def import_state(previous: Path, records: list[dict], models: dict,
     original_adapter = previous / 'repo/participant/reference_cache.py'
     old_scorer = code_digest([*scorer_files, original_adapter])
     new_scorer = scorer_identity()
+    old_context = completed_context(previous, records, models, old_scorer) if complete else None
+    relocated_context = {**old_context, 'scorer_sha256': new_scorer} if complete else None
     out.mkdir(parents=True, exist_ok=True)
     imported, reference_count, prediction_count = {}, 0, 0
     for index, record in enumerate(records):
@@ -83,19 +105,38 @@ def import_state(previous: Path, records: list[dict], models: dict,
                 raise ValueError('Prediction copy changed content')
             prediction_count += 1
             statistic = prediction.with_name(f'{index:04d}-statistics.json')
+            if complete and not statistic.exists():
+                raise ValueError('Previous complete scoring statistic is missing')
             if statistic.exists():
                 value = json.loads(statistic.read_text())
-                if value['source_identity'] != record['identity'] or 'context_sha256' in value:
-                    raise ValueError('Wrong legacy scoring statistic identity/format')
-                shutil.copyfile(statistic, target / statistic.name)
-                imported[f'{name}/{statistic.name}'] = digest(statistic)
+                if value['source_identity'] != record['identity']:
+                    raise ValueError('Wrong scoring statistic source/order')
+                if complete:
+                    payload = {k: v for k, v in value.items() if k != 'statistics_sha256'}
+                    if value['statistics_sha256'] != identity(payload) \
+                            or value['context_sha256'] != identity(old_context) \
+                            or value['prediction_sha256'] != digest(prediction) \
+                            or value['prediction_sha256'] != old_context['predictions'][name][index]:
+                        raise ValueError('Previous sealed scoring statistic changed')
+                    payload['context_sha256'] = identity(relocated_context)
+                    write_json(target / statistic.name, {**payload, 'statistics_sha256': identity(payload)})
+                else:
+                    if 'context_sha256' in value:
+                        raise ValueError('Wrong legacy scoring statistic format')
+                    shutil.copyfile(statistic, target / statistic.name)
+                imported[f'{name}/{statistic.name}'] = digest(target / statistic.name)
+    if complete:
+        write_json(out / 'scoring-context.json', relocated_context)
     receipt = {'previous_job_id': json.loads((previous / 'identity.json').read_text())['job_id'],
                'previous_source_sha256': spec['source_sha256'], 'manifest_sha256': digest(manifest),
                'old_scorer_sha256': old_scorer, 'new_scorer_sha256': new_scorer,
+               'complete_breadth': complete,
+               'previous_context_sha256': identity(old_context) if complete else None,
+               'previous_scores_sha256': digest(previous / 'result/breadth/scores.json') if complete else None,
                'references': reference_count, 'predictions': prediction_count,
                'statistics': imported,
                'guard': 'Unchanged prediction/reference code; every saved prediction is rechecked against its model'}
     write_json(out / 'imported-state.json', receipt)
     print(f'Imported {reference_count} references, {prediction_count} predictions, '
-          f'{len(imported)} verified legacy statistics', flush=True)
+          f'{len(imported)} verified statistics', flush=True)
     return receipt
