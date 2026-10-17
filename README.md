@@ -1,5 +1,28 @@
 # Fusion Equilibrium Challenge — participant workspace
 
+## Continue the current campaign
+
+The current work covers **both DIII-D and MAST**. Start with the
+[Claude handoff](docs/handoff/CLAUDE_HANDOFF.md), then the
+[code map](docs/handoff/CODE_MAP.md) and [cleanup review](docs/handoff/CLEANUP.md).
+Claude also reads the short repository instructions in [CLAUDE.md](CLAUDE.md).
+
+At the 13 October 2026 handoff, MAST candidate 003 is built and format-validated,
+but unsubmitted. DIII-D memory diagnostic 2961003 is accepted and still pending
+at the saved observation. The heartbeat is paused. Read the handoff receipts for
+timestamps, limitations and the next action; these are not live status claims.
+
+**Use this local checkout.** Most current research code is untracked, and
+`run_data/` and `.journal/` are ignored. A clone of `HEAD` does not contain the
+current campaign or its evidence. No commit or push was made for this handoff.
+
+## Historical setup and experiments
+
+The notes below describe the initial 7–8 October pipeline. Their scores, ranks,
+commands and "main campaign" wording are historical. They are retained for
+provenance; use the handoff for current operations and [tests/README.md](tests/README.md)
+before running old experiment checks.
+
 Goal: a reproducible entry, with a NeurIPS presentation or joint-paper contribution.
 The official starter remains at remote `upstream`; our private remote is `origin`.
 Organizer scoring modules remain unchanged.
@@ -19,7 +42,9 @@ under `vendor/fusion_starter/`; its revision is recorded in `VENDORED.md`.
 - Galvani CPU job: four CPUs, 16 GiB, no GPU, hard wall-time 20 minutes.
 
 Code: `participant/`. Frozen data/source/job manifests and results: ignored
-`run_data/`. This first model deliberately supports DIII-D only. Challenge 1 remains the main campaign. MAST is a separate future branch.
+`run_data/`. This first model deliberately supports DIII-D only. Challenge 1
+remains the main campaign. The separate input-driven MAST baseline is documented
+in [runs/mast-001.md](runs/mast-001.md).
 
 Completed local checks are in `RUNS.md`. The selected first-submission model
 uses quadratic current interactions and Thomson profile summaries. On eight
