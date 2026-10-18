@@ -9,9 +9,48 @@ they come from machine literature, not from data.
 import numpy as np
 
 from participant.mast_inputs import SIGNALS
+import json
+from pathlib import Path
+
 from research.passive import flux_response, induced_currents, inductance, wall_filaments
 
 SOL_SCALE = 0.5
+GEOMETRY = Path(__file__).parent / "geometry/mast_pf_passive.json"
+INCONEL, STEEL = 1.03e-6, 7.4e-7  # ohm m (Berkery 2021; FreeGSNKE MAST-U files)
+GROUPS = {  # predeclared ablations (runs/search-space-review-20261018.md)
+    "V": ("vertw", "uhorw", "lhorw"),
+    "VC": ("vertw", "uhorw", "lhorw", "incon", "ring", "topcol", "botcol", "endcrown_l",
+           "endcrown_u", "rodgr"),
+    "ALL": ("vertw", "uhorw", "lhorw", "incon", "ring", "topcol", "botcol", "endcrown_l",
+            "endcrown_u", "rodgr", "mid", "p2larm", "p2uarm", "p2ldivpl", "p2udivpl", "coil_cases"),
+    # rodgr upper/lower blocks treated as graphite armour (excluded); declared before results
+    "ALLg": ("vertw", "uhorw", "lhorw", "incon", "ring", "topcol", "botcol", "endcrown_l",
+             "endcrown_u", "mid", "p2larm", "p2uarm", "p2ldivpl", "p2udivpl", "coil_cases"),
+}
+
+
+def geometry_filaments(groups, max_len=0.08):
+    """Toroidal filaments from the public EFIT passive geometry. Each rectangle is split
+    along its long side into pieces <= max_len (independent loops, area-weighted
+    resistance rho 2 pi R / area). The mid-column graphite tile layer (rodgr, |Z| < 1.08 m)
+    is toroidally segmented and excluded; the Inconel tube uses Inconel resistivity."""
+    geo = json.loads(GEOMETRY.read_text())
+    out = []
+    for name in GROUPS[groups]:
+        g = geo[name]
+        for r, z, w, h in zip(g["r"], g["z"], g["width"], g["height"]):
+            w, h = abs(w), abs(h)
+            if name == "rodgr" and abs(z) < 1.08:
+                continue
+            rho = INCONEL if name == "incon" else STEEL
+            n = max(1, int(np.ceil(max(w, h) / max_len)))
+            for k in range(n):
+                f = (k + 0.5) / n - 0.5
+                fr, fz = (r + f * w, z) if w >= h else (r, z + f * h)
+                area = w * h / n
+                out.append((fr, fz, rho * 2 * np.pi * fr / area, max(min(w, h), max(w, h) / n) / 4))
+    r, z, res, rad = (np.array(v, float) for v in zip(*out))
+    return r, z, res, rad
 
 
 def signal_on_grid(row, name, grid_ms):
@@ -23,7 +62,8 @@ def signal_on_grid(row, name, grid_ms):
 
 def passive_flux(row, vessel, step_ms=1.0, lead_ms=300.0):
     """Induced passive flux on the grid at the EFIT times: (T, 65*65) in Wb/rad."""
-    fr, fz, res, rad = wall_filaments(**vessel)
+    fr, fz, res, rad = (geometry_filaments(vessel["groups"]) if "groups" in vessel
+                        else wall_filaments(**vessel))
     efit = np.asarray(row["efit_times"], float)
     grid_ms = np.arange(efit.min() - lead_ms, efit.max() + step_ms, step_ms)
     names = np.asarray(row["coil_input_column"]).astype(str)

@@ -116,7 +116,7 @@ def kinetic_shape(phi, axis_value, level, r, z, points, region, psin, power=1.5)
 
 def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, axis_r=None,
           points=None, info=None, z_target=None, edge_out=None, bz_sign=1.0, bz_fixed=0.0,
-          bz_gain=0.05):
+          bz_gain=0.05, bz_in_output=True):
     """Equilibrium flux (65x65, axis maximum) and the plasma current cells for one frame.
 
     edges: optional measured (R_in, R_out) of the LCFS on the Z=0 midplane. The pressure
@@ -130,6 +130,9 @@ def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, 
     edge_out: optional measured outboard midplane LCFS radius (m). A uniform vertical-field
     correction psi_c = bz R^2 / 2 (stand-in for unmeasured passive currents) is adapted so the
     LCFS crosses the midplane there; bz_sign orients the update (calibrated once).
+    bz_in_output=False returns coil flux + plasma flux only: the correction positions the
+    plasma current during the solve but is not added to the output map (022 showed the
+    uniform field itself costs R2_psi over the whole grid).
     """
     kernel, sr, sz = plasma_kernel(tuple(r), tuple(z))
     shape = (len(z) - 1, len(r) - 1)
@@ -196,7 +199,8 @@ def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, 
         new *= ip / (new.sum() * dA)
         cells = (1 - profile.relax) * cells + profile.relax * new
         r0 = (cells * sr).sum() / cells.sum()
-    phi = phi_ext + bz * rr2 + (kernel @ (cells.ravel() * dA)).reshape(phi_ext.shape)
+    phi = (phi_ext + (bz * rr2 if bz_in_output else 0.0)
+           + (kernel @ (cells.ravel() * dA)).reshape(phi_ext.shape))
     if info is not None:
         info.update(beta0=beta0, r0=r0, bz=bz)
     return phi, cells

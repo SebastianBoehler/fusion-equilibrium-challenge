@@ -159,3 +159,71 @@ kept on disk.
 - `ops/mast-gs-array.sbatch` shards a run over 4 × 32-core cpu-galvani nodes.
 - Submitted: 2973839 (037: Te^0.75 + edge + smooth anchor + config) and 2973844 (035: edge +
   smooth anchor + config). The local 035 run continues as a backup.
+
+## 17 Oct — 022 result, compliance pruning, channel-selected full 024
+
+**994704 (022: config + smooth anchor + edge B_Z constraint; uploaded by the human's
+other session):**
+- MAST S **0.708768**: R²ψ **0.9250** (was 0.9816), q95 **0.5714** (best so far), βN
+  0.3178, D_LCFS 0.1744, consistency 0.2538.
+- Consistency per scalar: R_axis 0.646 (was 0.471), volume 0.668 (was 0.556); κ −0.075,
+  tri_top 0.168, tri_bot −0.149, li −0.141.
+- **Interpretation:** the uniform-field stand-in (ψ_c = B_z R²/2) alters the flux across
+  the whole grid and costs R²ψ. The same constraint improves radial placement and size.
+- **Next:** 038 = the same solve with `--edge-nobz` (the correction positions J; output =
+  coil + plasma flux only). Cluster job 2973907.
+
+**Compliance pruning:**
+- The forum clarification prohibits priors or constants derived from MAST equilibrium
+  statistics.
+- **Dropped:** 023 (Te^0.75, chosen to match published MAST l_i/κ). Cluster job 2973839
+  was cancelled, and its local run blocked by `run_data/mast-037/shots` being a file.
+- **Kept, with disclosure:** solenoid factor (FreeGSNKE 0.5 multiplier + submitted-variant
+  selection); geometry-based inner wall; input-derived P2 LSN class; DIII-D-calibrated Te¹
+  profile; channel selection across submitted variants.
+
+**024 full** = 018/019 ψ (float32) + 022 q95 + 015b βN + 973093 DIII-D
+(`research/ensemble_channels.py`): `run_data/submission-mast-024/fusion-mast-best-024-full.zip`,
+SHA `06993a0e…1094`. Predicted from the separable channels:
+0.684094 + 0.15 · (0.571435 + 0.31776)/2 = **0.750784**; G ≈ 0.7545.
+
+**Repository:** the current code was committed and pushed to `origin/main` (031a014).
+The repo remains private until the final submission.
+
+## 17 Oct, 04:00 — 021b official; leaderboard; efps finding
+
+- **994648 (021b):** MAST S **0.756107**. R²ψ 0.98226, D_LCFS 0.1583, consistency
+  0.3321 (R_axis 0.593, Z_axis 0.301, κ 0.217, tri_top 0.333, tri_bot 0.289, volume 0.591,
+  li 0.001), q95 0.5606, βN 0.3096 (own Te flux; 015b's 0.3178 stays best).
+- **Full 025** = 021b ψ + 022 q95 + 015b βN. Predicted MAST S **0.7575**, G ≈ 0.7613;
+  SHA `f5e2dd59…f1ac`.
+- **026** = 021b ψ smoothed [¼ ½ ¼] in time + median-5 of 022 q95 + 015b βN.
+  ‖d‖²/T = 0.00032, so R²ψ moves by at most ±0.0003.
+- **Leaderboard at 03:30:** our selected row is the MAST-only 022 (G 0), rank 143/145.
+  It needs a full archive as the last upload. Top G: yszhang 0.978, catskills 0.965
+  (DIII-D 0.917), hornedyak 0.948 (DIII-D 0.860), dmitryzhevn 0.941.
+  - **DIII-D-denominator lever:** the gate allows DIII-D 0.85, up to 1.16× G, at the cost
+    of Challenge 1. Flagged to the human; not pursued.
+
+**Forum facts:**
+- MAST `sol_current` is exactly 2× the FAIR-MAST level-2 solenoid current. This
+  independently confirms the 0.5 factor.
+- **`efps_current` is a P2 link-board feed current.** Our model ignored it.
+
+**efps statistics:** median 5.4 kA (p95 11.4 kA); non-zero in 85% of frames; correlation
+0.81 with P2U. P2's per-turn current has median 4.9 kA.
+
+**Pilot** (035 settings minus edge: config + smooth anchor; 35 shots):
+
+| efps flows through | X-point-defined frames | Te mismatch | κ median | l_i median |
+|---|---:|---:|---:|---:|
+| none (034) | 0.77 | 0.0686 | 1.81 | 1.06 |
+| **all P2 turns** | **0.92** | **0.0664** | 1.88 | 1.01 |
+| inner section | 0.86 | 0.0665 | 1.85 | 1.03 |
+| outer section | 0.84 | 0.0669 | 1.84 | 1.04 |
+
+The corpus is diverted-only (published dataset description), so the X-point fraction is a
+label-free structural check. "All" is the most physical.
+
+**Full run 039** (config + smooth anchor + efps all): running locally and as cluster array
+2973911.

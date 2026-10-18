@@ -22,10 +22,10 @@ COLUMNS = ("source", "efit_times", "efit_grid_R", "efit_grid_Z", "magnetics_time
 
 
 def read_inputs(entry: dict, revision: str, cache: Path) -> dict:
-    if not entry["path"].startswith("data/mast_public_test/"):
-        raise ValueError("Only the input-only MAST public split is permitted")
+    if not entry["path"].startswith(("data/mast_public_test/", "data/mast_private_test/")):
+        raise ValueError("Only the input-only MAST test splits are permitted")
     path = Path(hf_hub_download(
-        "Sophelio/fusion-equilibrium-challenge", repo_type="dataset",
+        entry.get("repo_id", "Sophelio/fusion-equilibrium-challenge"), repo_type="dataset",
         filename=entry["path"], revision=revision, local_dir=cache / "hub"))
     with path.open("rb") as handle:
         digest = file_digest(handle, "sha256").hexdigest()
@@ -78,11 +78,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--cache", type=Path, required=True)
+    parser.add_argument("--expected", type=int, default=1206)  # Final: 1205
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text())
     entries = manifest["shots"]
-    if manifest["config"] != "mast_public_test" or len(entries) != 1206:
-        raise ValueError("Expected the complete 1,206-shot MAST public split")
+    if manifest["config"] not in ("mast_public_test", "mast_private_test") or len(entries) != args.expected:
+        raise ValueError(f"Expected the complete {args.expected}-shot MAST test split")
     started = time.monotonic()
     with ThreadPoolExecutor(max_workers=8) as pool:
         for count, _ in enumerate(pool.map(
