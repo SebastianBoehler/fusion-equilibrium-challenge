@@ -67,7 +67,7 @@ def main() -> None:
     p.add_argument("--check-public", action="store_true")
     p.add_argument("--repo-id", default=FINAL)
     p.add_argument("--config", choices=("diii_d_private_test", "mast_private_test",
-                                        "diii_d_public_test", "mast_public_test"))
+                                        "diii_d_public_test", "mast_public_test", "diii_d_train"))
     p.add_argument("--revision")
     p.add_argument("--expected", type=int)
     p.add_argument("--out", type=Path, help="directory for manifest.json and stream-order.json")
