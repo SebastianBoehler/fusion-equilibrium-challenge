@@ -41,7 +41,7 @@ the entrant's direction.
    sbatch --array=0-10 --export=ALL,PACKED=data/packed,RUNS=data/runs ops/nn-train.sbatch
    ```
    Measured training time is **2.84 A100-hours** in total (12–37 min per member) on an
-   A100-PCIE-40GB, well under the 24-hour ceiling. GPU training is not bit-deterministic.
+   A100-PCIE-40GB, well under the 24-hour ceiling. GPU training may not be bit-deterministic (unverified).
    The shipped weights are the exact ones used (SHA256 values in `nn_members.json`).
 4. **Inference.** CPU, about 4 min. See `runs/final-runbook.md` step 2.
    - Rebuilding the public predictions with today's environment matched the submitted
