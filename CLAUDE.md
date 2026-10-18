@@ -32,7 +32,11 @@ Development scores is allowed, including several settings of one parameter. Disc
 **DIII-D:** labels may be used freely. The locked128 held-out shots stay unread (our own
 evaluation discipline).
 
-**Final** (19 Oct 02:00 CEST → 26 Oct 01:00 CET):
+**Phase dates (Codabench phase API, checked 18 Oct):** Development closed on 18 Oct at
+00:00 UTC. The Final runs 19 Oct 00:00 UTC → 26 Oct 00:00 UTC. Verify the dates via the API before
+planning uploads.
+
+**Final:**
 - At most three submissions.
 - Each needs a reproduction-package reference in `Code URL`: a public repo pinned to a
   commit SHA, or an archive with SHA256.
