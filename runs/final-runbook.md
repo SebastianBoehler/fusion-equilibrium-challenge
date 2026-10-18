@@ -46,14 +46,17 @@ CK=($(.venv/bin/python -c "import json;print(' '.join(json.load(open('run_data/s
   math-library order). The file SHA therefore differs (`7a338bb9…` vs `6f243219…`).
   Declare float32-level rebuild tolerance in the package.
 
-## 3. MAST: the 030 recipe as one solver run (CPU; about 100 min on 12 local workers)
+## 3. MAST: one solver run (CPU; about 60–100 min on 12–14 local workers)
+
+The defaults reproduce the 030 recipe (`config-union`, inner wall, smoothed anchor). Add
+`--passive ALLg` and/or `--anchor-prior <previous run dir>` only if the 18 October uploads
+(035–037) promote them. Choose `--betan` (`flux` or `flux-kin`) from the 034 result.
 
 ```bash
-MAST_DATA_DIR=run_data/final/mast .venv/bin/python -B -m research.mast_gs_robust --shots all \
-  --vertical config-union --inner inner --smooth-anchor --out run_data/final/mast-solve --workers 12
-MAST_DATA_DIR=run_data/final/mast .venv/bin/python -B -m research.mast_final \
-  --solve-dir run_data/final/mast-solve --config mast_private_test --expected 1205 \
-  --out run_data/final/mast-pred
+export MAST_DATA_DIR=run_data/final/mast OMP_NUM_THREADS=1 PYTHONPATH=.
+.venv/bin/python -B -m research.mast_gs_robust --out run_data/final/mast-solve --workers 12
+.venv/bin/python -B -m research.mast_final --solve-dir run_data/final/mast-solve \
+  --config mast_private_test --expected 1205 --betan flux-kin --out run_data/final/mast-pred
 ```
 
 The cluster alternative is a 4-way array with the same flags; `ops/mast-gs-array.sbatch`
@@ -66,16 +69,21 @@ needs `MAST_DATA_DIR` exported.
 
 ## 4. Archive
 
-Combine `diii_d_private_test.npz` and `mast_private_test.npz` at the zip root. This still
-needs a small combiner with the private names (`combine_channels`/`ensemble_channels`
-hard-code the public names). Validate shapes, float32, finiteness and shot counts, then
-write a receipt.
+```bash
+.venv/bin/python -B -m participant.final_archive \
+  --member run_data/final/d3d-pred/diii_d_private_test.npz 879 \
+  --member run_data/final/mast-pred/mast_private_test.npz 1205 \
+  --out run_data/final/fusion-final-1.zip
+```
+
+`final_archive` checks shot counts, shapes, float32 and finiteness for every member, and
+writes a receipt with the SHA256 values.
 
 ## 5. Reproduction package (blocker for the Code URL)
 
 | Item | Status |
 |---|---|
-| Source, OSI licence, pinned env | Repo is private; add our own MIT licence; torch is pinned in `uv.lock` |
+| Source, OSI licence, pinned env | MIT `LICENSE` added (18 Oct); repo still private; torch pinned in `uv.lock` |
 | Exact weights | 11 × `model.pt` (1.34 GB), each over 100 MB. Needs a release/HF/Zenodo upload with SHA256 (human decision) |
 | Training entrypoint | `participant/nn_prepare.py` + `nn_train.py`; the nn-008 sbatch launchers must be added to `ops/` |
 | Inference entrypoint | The commands above |

@@ -15,7 +15,7 @@ Vertical position (--vertical):
   above the input noise band) get the smoothed force-balance height forced downward; all
   other shots Z = 0. Reproduces scored candidate 030 (official 996142) bit for bit.
 
-Options: --smooth-anchor (5-frame median of anchors), --anchor-prior DIR (Te flux-function
+Options: --no-smooth-anchor (default: 5-frame median of anchors), --anchor-prior DIR (Te flux-function
 symmetry correction of the anchor from a previous run), --edge/--edge-nobz (outboard LCFS at
 the Te = 30 eV crossing via a uniform B_Z correction during the solve, optionally left out of
 the output), --passive {V,VC,ALL,ALLg}, --te-power. Frames failing the plausibility check

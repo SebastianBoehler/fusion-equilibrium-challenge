@@ -1,5 +1,8 @@
 # Code audit — 17 October 2026 (MAST pipeline vs intent)
 
+*Refers to the code before the 18 October cleanup (tag `pre-cleanup-20261018`); the findings
+were addressed or the code was removed (`docs/handoff/CLEANUP.md`).*
+
 Read-only review of the MAST zero-shot path (`gs_picard`, `mast_gs_robust`, `mast_gs`,
 builders, combine/ensemble/temporal, `participant/mast_*`). Notes and checks are in the
 session scratchpad. No repository code was changed by the audit.

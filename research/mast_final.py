@@ -1,7 +1,7 @@
 """Final-phase MAST predictions from one solver run (single-run pipeline).
 
-Input: a research.mast_gs_robust output directory (run with --vertical config-union --inner
-inner --smooth-anchor; MAST_DATA_DIR pointing at the split's data.json + inputs/).
+Input: a research.mast_gs_robust output directory (default flags = the 030 recipe;
+MAST_DATA_DIR pointing at the split's data.json + inputs/).
 Per shot:
 - psirz: the solver flux, smoothed in time with [1/4, 1/2, 1/4] (ends renormalized), as in 026/030.
 - q95: field-line integral at psiN 0.95 on the same flux (bounds 1.5-30, nearest valid

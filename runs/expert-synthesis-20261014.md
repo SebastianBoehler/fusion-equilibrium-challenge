@@ -209,6 +209,8 @@ The repo remains private until the final submission.
 - MAST `sol_current` is exactly 2× the FAIR-MAST level-2 solenoid current. This
   independently confirms the 0.5 factor.
 - **`efps_current` is a P2 link-board feed current.** Our model ignored it.
+  **Correction (17 Oct):** ignoring it was right. efps is the P2 per-turn current and is
+  already inside the P2 totals; the efps runs below double-counted P2 (027: MAST S 0.703).
 
 **efps statistics:** median 5.4 kA (p95 11.4 kA); non-zero in 85% of frames; correlation
 0.81 with P2U. P2's per-turn current has median 4.9 kA.

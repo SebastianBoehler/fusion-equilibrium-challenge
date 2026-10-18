@@ -7,19 +7,15 @@ Importing an analytic helper does not mean the script's `main()` is safe to run 
 
 | Files | Purpose / execution scope |
 |---|---|
-| `mast_green_checks.py`, `mast_surface_checks.py` | Physical identities plus real input-only MAST inference and target isolation; completed baseline experiments, not needed again unchanged |
-| `field_checks.py`, `geometry_checks.py` | Real TRAIN gradient/numerical checks for their loss modules; run only for a relevant separately declared change |
-| `fast_score_checks.py` | Parallel-versus-serial scoring agreement; actual TRAIN references and scorer version matter |
-| `scalar_file_checks.py` | Real-record file-descriptor stress regression; called from the old pipeline verifier |
-| `scoring_resume_checks.py` | Cached-score identity/interruption/import rejection regressions; called by `verify_pipeline.py` |
-| `verify_pipeline.py` | Legacy ridge/packing/scalar/scoring integration, including fitting and real data; not a current MAST/MLP smoke test |
-| `verify_constant_profile.py` | Specific released constant-profile/timestamp edge case and target redaction |
-| `nn_ensemble_check.py`, `nn_regression_check.py` | Saved checkpoint/scorer comparisons on declared subsets; no population or official-equivalence claim |
-| `nn_error_breakdown.py` | Diagnostic analysis despite its directory/name; not a unit test |
+| `mast_green_checks.py`, `mast_surface_checks.py` | Physical identities and input-only MAST inference checks |
+| `fast_score_checks.py` | Parallel-versus-serial scoring agreement on real TRAIN references |
+| `nn_ensemble_check.py`, `nn_regression_check.py` | Saved-checkpoint scorer comparisons on declared DIII-D subsets |
+| `nn_error_breakdown.py` | Diagnostic analysis, not a unit test |
 
-No test was deleted in the handoff cleanup: no redundant invariant was established.
-Mock patches in scoring-resume checks guard against unwanted recomputation; they do
-not replace scientific inputs with fabricated training data.
+The MAST runner's bit-identity regression is described in `docs/handoff/CODE_MAP.md`.
+
+The 18 October cleanup removed six checks of the retired ridge pipeline (tag
+`pre-cleanup-20261018`).
 
 For documentation-only cleanup, syntax parsing and link/source-identity checks suffice:
 

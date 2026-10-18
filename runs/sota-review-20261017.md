@@ -15,7 +15,8 @@ The claims below were re-checked on the release **inputs** only (no labels).
      - q95 R² 0.113 vs 0.585;
      - tri_bot −0.10 vs 0.28.
    - efps is now a consistency check only.
-2. **P2 up/down asymmetry is calibration noise.**
+2. **P2 up/down asymmetry looked like calibration noise. Wrong:** candidate 029 showed the
+   P2-ratio class captures real downward shifts (see the 029 result below); keep it.
    - In 935 shots with large positive P2, the asymmetry spans −0.019 to +0.010 (p1–p99).
    - The 223-shot "LSN" class came from weak or negative P2 shots.
 3. **The P6 radial-field coil carries the up-down signal.**
