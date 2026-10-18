@@ -59,7 +59,7 @@ def signal_on_grid(row, name, grid_ms):
     return np.interp(grid_ms, t[ok], v[ok])
 
 
-def passive_flux(row, groups, step_ms=1.0, lead_ms=300.0):
+def passive_flux(row, groups, step_ms=1.0, lead_ms=300.0, sol_scale=SOL_SCALE):
     """Induced passive flux on the grid at the EFIT times: (T, 65*65) in Wb/rad, and the
     filament currents (T, K) in A."""
     fr, fz, res, rad = geometry_filaments(groups)
@@ -71,7 +71,7 @@ def passive_flux(row, groups, step_ms=1.0, lead_ms=300.0):
         sel = names == column
         signal = column.removeprefix("magnetics_")
         current = signal_on_grid(row, signal, grid_ms) * 1000
-        per_element = (SOL_SCALE if signal == "sol_current" else 1 / sel.sum())
+        per_element = (sol_scale if signal == "sol_current" else 1 / sel.sum())
         response = flux_response(row["coil_R"][sel], row["coil_Z"][sel], fr, fz).sum(axis=1)
         drive += np.outer(current * per_element, response)
     ip = signal_on_grid(row, "plasma_current", grid_ms) * 1000

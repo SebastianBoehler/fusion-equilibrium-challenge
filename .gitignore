@@ -13,3 +13,4 @@ manifest.json
 run_data/
 .journal/
 .learnings/
+.venv-fairmast/

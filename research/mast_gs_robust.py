@@ -65,6 +65,7 @@ class RunConfig:
     te_power: float = 1.0
     passive: str | None = None
     anchor_prior: str | None = None
+    sol_scale: float = SOL_SCALE  # per-element share of sol_current (flux loops: 0.25)
 
 
 def te_axis(pr, te):
@@ -93,11 +94,12 @@ def fill(values, ok, median):
     return smooth[np.abs(np.arange(len(values))[:, None] - good[None]).argmin(axis=1)]
 
 
-def fallback_psi(row, index):
-    """Candidate-004 flux (002 Green model, half-current solenoid): from the public archive
-    when available, else recomputed (bit-identical); coils-only flux if 002 cannot run."""
+def fallback_psi(row, index, sol_scale=SOL_SCALE):
+    """Candidate-004-style flux (002 Green model with the solenoid at sol_scale): from the
+    public 004 archive when available and sol_scale is 0.5, else recomputed (bit-identical
+    for 0.5); coils-only flux if 002 cannot run."""
     archive = ROOT / "submission-mast-004/fusion-mast-solenoid-004.zip"
-    if PUBLIC and archive.exists():
+    if PUBLIC and sol_scale == SOL_SCALE and archive.exists():
         with zipfile.ZipFile(archive) as zf, zf.open("mast_public_test.npz") as inner, \
                 zipfile.ZipFile(inner) as old:
             return np.lib.format.read_array(old.open(f"shot_{index:04d}_psirz.npy"))
@@ -106,9 +108,9 @@ def fallback_psi(row, index):
     sol = SIGNALS.index("sol_current")
     try:
         psi = predict(row)["psirz"].astype(np.float64).reshape(-1, 65 * 65)
-        psi -= 0.5 * currents[:, sol, None] * 1000 * kernel[sol][None]
+        psi -= (1 - sol_scale) * currents[:, sol, None] * 1000 * kernel[sol][None]
     except ValueError:  # e.g. Ip <= 0 or unusable Thomson in some frame
-        psi = sum(currents[:, c, None] * 1000 * (SOL_SCALE if c == sol else 1.0) * k[None]
+        psi = sum(currents[:, c, None] * 1000 * (sol_scale if c == sol else 1.0) * k[None]
                   for c, k in kernel.items())
     return psi.reshape(-1, 65, 65).astype(np.float32)
 
@@ -172,11 +174,11 @@ def run_shot(task):
     currents = aligned_currents(row)
     ext = np.zeros((len(currents), r.size * z.size))
     for column, response in coil_kernel(row):
-        scale = SOL_SCALE if SIGNALS[column] == "sol_current" else 1.0
+        scale = cfg.sol_scale if SIGNALS[column] == "sol_current" else 1.0
         ext += currents[:, column, None] * 1000 * scale * response[None]
     if cfg.passive is not None:
         from research.mast_passive import passive_flux
-        ext += passive_flux(row, cfg.passive)[0]
+        ext += passive_flux(row, cfg.passive, sol_scale=cfg.sol_scale)[0]
     ext = ext.reshape(-1, len(z), len(r))
     ip = currents[:, SIGNALS.index("plasma_current")] * 1000
     pr, pz, te = mast_points(row)
@@ -192,7 +194,7 @@ def run_shot(task):
     anchors = [a if a is not None else shot_anchor for a in anchors]
     points = [(pr[ok], pz[ok], te[t][ok]) if ok.sum() >= 5 else None
               for t, ok in enumerate(np.isfinite(te))]
-    fallback = fallback_psi(row, index)
+    fallback = fallback_psi(row, index, cfg.sol_scale)
     shifted = cfg.vertical == "config-union" and shifted_class(currents, ip)
     z_targets = [0.0 if cfg.vertical == "config-union" else None] * len(ip)
     if shifted:  # pass 1: force balance; smoothed centroid heights, forced downward
@@ -261,9 +263,10 @@ def main() -> None:
     p.add_argument("--edge-nobz", action="store_true")
     p.add_argument("--te-power", type=float, default=1.0)
     p.add_argument("--passive", choices=("V", "VC", "ALL", "ALLg"))
+    p.add_argument("--sol-scale", type=float, default=SOL_SCALE)
     a = p.parse_args()
     cfg = RunConfig(a.vertical, a.inner, not a.no_smooth_anchor, a.edge, a.edge_nobz,
-                    a.te_power, a.passive, a.anchor_prior)
+                    a.te_power, a.passive, a.anchor_prior, a.sol_scale)
     shots = json.loads((DATA / "data.json").read_text())["shots"]
     indices = list(range(len(shots))) if a.shots == "all" else json.loads(Path(a.shots).read_text())
     started, metas = time.monotonic(), []
