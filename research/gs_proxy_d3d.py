@@ -48,7 +48,7 @@ def run_shot(args):
     ip = features(row)[:, SIGNALS.index("plasma_current")] * 1000
     allowed = region(r, z, 1.0)
     q = np.sign(np.median(ip))  # solve with positive current; flip reversed-Ip shots back
-    out, fails, init, solved = [], 0, None, []
+    out, fails, solved = [], 0, []
     frames = range(0, len(p["phi"]), stride)
     for t in frames:
         edges = axis_r = None
@@ -66,12 +66,12 @@ def run_shot(args):
                 ok = np.isfinite(te[t])
                 pts = (pr[ok], pz[ok], te[t][ok])
             info = {}
-            phi, cells = solve(q * p["ext"][t], q * ip[t], r, z, allowed, profile, None, edges,
-                               axis_r, pts, info)
+            phi, cells = solve(q * p["ext"][t], q * ip[t], r, z, allowed, profile, edges=edges,
+                               axis_r=axis_r, points=pts, info=info)
             solved.append((phi, cells, info))
             phi = q * phi
         except ValueError:
-            phi, fails, init = p["ext"][t] + p["circ"][t], fails + 1, None
+            phi, fails = p["ext"][t] + p["circ"][t], fails + 1
             solved.append(None)
         out.append(p["sign"] * phi)
     idx = list(frames)

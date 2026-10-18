@@ -60,18 +60,3 @@ def induced_currents(times, drive_flux, m, resistance, sample_times):
         out[order[j]] = current
         j += 1
     return out
-
-
-def wall_filaments(r_in, r_out, z_half, thickness, resistivity, spacing):
-    """Filaments along a rectangular vessel cross-section (outer wall, lids, inner wall)."""
-    pts = []
-    for z in np.arange(-z_half, z_half + 1e-9, spacing):        # outer cylinder
-        pts.append((r_out, z, spacing))
-    for z in np.arange(-z_half, z_half + 1e-9, spacing):        # inner (centre-column) can
-        pts.append((r_in, z, spacing))
-    for r in np.arange(r_in + spacing, r_out - 1e-9, spacing):  # top and bottom lids
-        pts.append((r, z_half, spacing))
-        pts.append((r, -z_half, spacing))
-    r, z, width = (np.array(v, float) for v in zip(*pts))
-    resistance = resistivity * 2 * np.pi * r / (width * thickness)
-    return r, z, resistance, np.maximum(thickness, width) / 4

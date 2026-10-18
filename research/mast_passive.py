@@ -2,19 +2,18 @@
 
 Coil elements use the confirmed conventions: PF columns carry total ampere-turns spread over
 their elements; each solenoid element carries half the feed current (mast-021). The plasma
-current is one filament at (0.92 m, 0). Vessel parameters are explicit arguments because
-they come from machine literature, not from data.
+current is one filament at (0.92 m, 0). Passive conductors come from the public EFIT
+geometry (research/geometry/), with literature resistivities; nothing is fitted.
 """
 
-import numpy as np
-
-from participant.mast_inputs import SIGNALS
 import json
 from pathlib import Path
 
-from research.passive import flux_response, induced_currents, inductance, wall_filaments
+import numpy as np
 
-SOL_SCALE = 0.5
+from research.mast_gs import SOL_SCALE
+from research.passive import flux_response, induced_currents, inductance
+
 GEOMETRY = Path(__file__).parent / "geometry/mast_pf_passive.json"
 INCONEL, STEEL = 1.03e-6, 7.4e-7  # ohm m (Berkery 2021; FreeGSNKE MAST-U files)
 GROUPS = {  # predeclared ablations (runs/search-space-review-20261018.md)
@@ -60,10 +59,10 @@ def signal_on_grid(row, name, grid_ms):
     return np.interp(grid_ms, t[ok], v[ok])
 
 
-def passive_flux(row, vessel, step_ms=1.0, lead_ms=300.0):
-    """Induced passive flux on the grid at the EFIT times: (T, 65*65) in Wb/rad."""
-    fr, fz, res, rad = (geometry_filaments(vessel["groups"]) if "groups" in vessel
-                        else wall_filaments(**vessel))
+def passive_flux(row, groups, step_ms=1.0, lead_ms=300.0):
+    """Induced passive flux on the grid at the EFIT times: (T, 65*65) in Wb/rad, and the
+    filament currents (T, K) in A."""
+    fr, fz, res, rad = geometry_filaments(groups)
     efit = np.asarray(row["efit_times"], float)
     grid_ms = np.arange(efit.min() - lead_ms, efit.max() + step_ms, step_ms)
     names = np.asarray(row["coil_input_column"]).astype(str)
@@ -83,5 +82,3 @@ def passive_flux(row, vessel, step_ms=1.0, lead_ms=300.0):
     to_grid = flux_response(fr, fz, rr.ravel(), zz.ravel())
     return currents @ to_grid.T, currents
 
-
-SIGNAL_CHECK = SIGNALS  # imported for callers that validate signal availability

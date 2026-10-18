@@ -70,7 +70,7 @@ def find_axis(phi, allowed, guess):
     return int(pr[k]), int(pc[k])
 
 
-def vertical_shift(cells, sr, sz, br_cells, dz):
+def vertical_shift(cells, sr, br_cells):
     """Rigid vertical shift (in cells) that zeroes the external vertical force on J."""
     shifts = np.linspace(-12, 12, 49)
     force = []
@@ -93,7 +93,7 @@ def midplane_edges(region, r, z, z_mid=0.0):
 
 
 def kinetic_shape(phi, axis_value, level, r, z, points, region, psin, power=1.5):
-    """Current shape g(psiN) ~ Te^1.5 from Thomson points mapped onto the present flux."""
+    """Current shape g(psiN) ~ Te^power from Thomson points mapped onto the present flux."""
     pr, pz, te = points
     rows = (pz - z[0]) / (z[1] - z[0])
     cols = (pr - r[0]) / (r[1] - r[0])
@@ -114,22 +114,23 @@ def kinetic_shape(phi, axis_value, level, r, z, points, region, psin, power=1.5)
     return np.where(region, np.interp(psin, xs, vs), 0.0)
 
 
-def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, axis_r=None,
-          points=None, info=None, z_target=None, edge_out=None, bz_sign=1.0, bz_fixed=0.0,
-          bz_gain=0.05, bz_in_output=True):
+def solve(phi_ext, ip, r, z, allowed, profile=Profile(), *, edges=None, axis_r=None,
+          points=None, info=None, z_target=None, edge_out=None, bz_gain=0.05,
+          bz_in_output=True):
     """Equilibrium flux (65x65, axis maximum) and the plasma current cells for one frame.
 
     edges: optional measured (R_in, R_out) of the LCFS on the Z=0 midplane. The pressure
     share beta0 is then adapted each iteration so the LCFS midplane centre matches them.
     axis_r: optional measured magnetic-axis radius (e.g. the Thomson Te peak); beta0 is then
     adapted so the sub-grid axis radius matches it.
-    points: optional Thomson (R, Z, Te) arrays; the current shape becomes Te^1.5 as a function
-    of normalized flux (Spitzer, Ohmic approximation) instead of the parametric profile.
+    points: optional Thomson (R, Z, Te) arrays; the current shape becomes Te^p
+    (profile.te_power; 1.0 calibrated on DIII-D) as a function of normalized flux instead of
+    the parametric profile.
     info: optional dict filled with the final pressure share beta0 and reference radius r0.
     z_target: optional current-centroid height (m) to pin, overriding profile.vertical.
     edge_out: optional measured outboard midplane LCFS radius (m). A uniform vertical-field
     correction psi_c = bz R^2 / 2 (stand-in for unmeasured passive currents) is adapted so the
-    LCFS crosses the midplane there; bz_sign orients the update (calibrated once).
+    LCFS crosses the midplane there.
     bz_in_output=False returns coil flux + plasma flux only: the correction positions the
     plasma current during the solve but is not added to the output map (022 showed the
     uniform field itself costs R2_psi over the whole grid).
@@ -140,15 +141,14 @@ def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, 
     dA = (r[1] - r[0]) * (z[1] - z[0])
     br = -np.gradient(phi_ext, z, axis=0) / r[None, :]
     br_cells = to_cells(br)
-    if init is None:
-        r0, z0, w = r.mean(), 0.0, (r[-1] - r[0]) / 8
-        init = np.exp(-((sr - r0) ** 2 + (sz - z0) ** 2) / (2 * w * w)) * to_cells(allowed)
+    r0, z0, w = r.mean(), 0.0, (r[-1] - r[0]) / 8  # cold start (Gaussian seed)
+    init = np.exp(-((sr - r0) ** 2 + (sz - z0) ** 2) / (2 * w * w)) * to_cells(allowed)
     cells = init * ip / (init.sum() * dA)
     r0 = (cells * sr).sum() / cells.sum()
     z0 = (cells * sz).sum() / cells.sum()
     axis = (int(np.argmin(np.abs(z - z0))), int(np.argmin(np.abs(r - r0))))
     beta0 = profile.beta0
-    bz = float(bz_fixed)
+    bz = 0.0
     rr2 = (r[None, :] ** 2) / 2
     for _ in range(profile.iterations):
         phi = phi_ext + bz * rr2 + (kernel @ (cells.ravel() * dA)).reshape(phi_ext.shape)
@@ -167,7 +167,7 @@ def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, 
                     r_out = r[j] + (row[j] - level) / (row[j] - row[j + 1]) * (r[1] - r[0])
                     break
             if np.isfinite(r_out):
-                bz = float(np.clip(bz + bz_sign * bz_gain * (edge_out - r_out), -0.05, 0.05))
+                bz = float(np.clip(bz + bz_gain * (edge_out - r_out), -0.05, 0.05))
         if axis_r is not None:
             iz, ir = axis
             if 0 < ir < len(r) - 1:
@@ -194,7 +194,7 @@ def solve(phi_ext, ip, r, z, allowed, profile=Profile(), init=None, edges=None, 
         elif profile.vertical == "zero":
             shift = -((new * sz).sum() / new.sum()) / (z[1] - z[0])
         else:
-            shift = vertical_shift(new, sr, sz, br_cells, z[1] - z[0])
+            shift = vertical_shift(new, sr, br_cells)
         new = ndimage.shift(new, (shift, 0), order=1, mode="constant")
         new *= ip / (new.sum() * dA)
         cells = (1 - profile.relax) * cells + profile.relax * new
