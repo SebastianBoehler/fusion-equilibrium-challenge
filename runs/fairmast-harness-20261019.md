@@ -88,3 +88,25 @@ DIII-D is the same in all three: the incumbent ensemble, `run_data/final/d3d-pre
 | 1 | Solenoid 0.5, union class, exponent 1.0, βN `flux-kin` | Development 030 recipe |
 | 2 | Solenoid 0.25, passive ALLg, exponent 0.75, βN `flux-kin` | Best measured-magnetics match |
 | 3 | Submission 2 + Te-symmetry anchor correction | Best combined harness score |
+
+## 5. Corrected data + calibrated probes (19 Oct evening; 80 shots, 7,365 frames)
+
+**Setup:**
+- Inputs re-converted with the solenoid fix (`run_data/fairmast/data2`); every run uses
+  the correct solenoid of 0.5 × release.
+- Probes were calibrated per probe on the vacuum precharge, with exact external fields at
+  each probe (`research/fairmast_probe_model.py`).
+- Probe columns give R² as mean / median.
+
+| Variant | Plasma loops CC | Plasma loops coils | CCBV | OBV | OBR |
+|---|---:|---:|---|---|---|
+| Submission 1 config (no passive, Te¹) | 0.58 | 0.56 | 0.78 / 0.81 | 0.26 / 0.46 | 0.80 / 0.86 |
+| **Passive ALLg, Te^0.75** | **0.78** | **0.77** | 0.71 / 0.81 | **0.79 / 0.76** | 0.79 / **0.95** |
+| + inner wall 0.19 m | 0.78 | 0.77 | 0.70 / 0.81 | 0.79 / 0.76 | 0.79 / 0.95 |
+| + Te^0.5 | 0.78 | 0.78 | 0.70 / 0.81 | 0.78 / 0.78 | 0.82 / 0.94 |
+
+**Vacuum gains** at the correct solenoid: CCBV 0.98, OBV 0.85–0.89, OBR 0.83–0.94. With a
+doubled solenoid, the CCBV gain is 0.44.
+
+**Decision: the last Final slot (submission 3) is `--passive ALLg --te-power 0.75`** at the
+default solenoid 0.5. The inner wall and Te^0.5 do not change anything measurably.
