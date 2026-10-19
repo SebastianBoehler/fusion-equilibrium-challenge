@@ -25,14 +25,19 @@ GROUPS = {  # predeclared ablations (runs/search-space-review-20261018.md)
     # rodgr upper/lower blocks treated as graphite armour (excluded); declared before results
     "ALLg": ("vertw", "uhorw", "lhorw", "incon", "ring", "topcol", "botcol", "endcrown_l",
              "endcrown_u", "mid", "p2larm", "p2uarm", "p2ldivpl", "p2udivpl", "coil_cases"),
+    # ALLg without the centre-column structure (ablation, 20 Oct; declared before results)
+    "OUT": ("vertw", "uhorw", "lhorw", "mid", "p2larm", "p2uarm", "p2ldivpl", "p2udivpl", "coil_cases"),
 }
+GROUPS["ALLgf"] = GROUPS["ALLg"]  # same conductors, fine discretization (see FINE)
+FINE = {"ALLgf": 0.01}  # max piece length (m): centre-column tube 6.5 mm from the CC probes
 
 
-def geometry_filaments(groups, max_len=0.08):
+def geometry_filaments(groups, max_len=None):
     """Toroidal filaments from the public EFIT passive geometry. Each rectangle is split
     along its long side into pieces <= max_len (independent loops, area-weighted
     resistance rho 2 pi R / area). The mid-column graphite tile layer (rodgr, |Z| < 1.08 m)
     is toroidally segmented and excluded; the Inconel tube uses Inconel resistivity."""
+    max_len = max_len or FINE.get(groups, 0.08)
     geo = json.loads(GEOMETRY.read_text())
     out = []
     for name in GROUPS[groups]:

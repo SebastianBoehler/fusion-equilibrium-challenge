@@ -262,7 +262,7 @@ def main() -> None:
     p.add_argument("--edge", action="store_true")
     p.add_argument("--edge-nobz", action="store_true")
     p.add_argument("--te-power", type=float, default=1.0)
-    p.add_argument("--passive", choices=("V", "VC", "ALL", "ALLg"))
+    p.add_argument("--passive", choices=("V", "VC", "ALL", "ALLg", "ALLgf", "OUT"))
     p.add_argument("--sol-scale", type=float, default=SOL_SCALE)
     a = p.parse_args()
     cfg = RunConfig(a.vertical, a.inner, not a.no_smooth_anchor, a.edge, a.edge_nobz,
