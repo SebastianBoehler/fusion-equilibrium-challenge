@@ -18,7 +18,8 @@ import shutil
 from huggingface_hub import HfApi, hf_hub_download
 
 PUBLIC = "Sophelio/fusion-equilibrium-challenge"
-FINAL = "Sophelio/fusion-equilibrium-challenge-final"
+FINAL = "ganatma/fusion-equilibrium-challenge-final"  # Final guide (18 Oct)
+FINAL_REVISION = "965040c12b814f33c8e7209f6b1799932247e793"
 
 
 def list_shots(repo_id: str, config: str, revision: str) -> list[dict]:
@@ -33,18 +34,24 @@ def list_shots(repo_id: str, config: str, revision: str) -> list[dict]:
     return sorted(shots, key=lambda s: s["path"])
 
 
-def download(repo_id: str, revision: str, shots: list[dict], cache: Path) -> None:
+def fetch_one(repo_id: str, revision: str, entry: dict, cache: Path) -> None:
+    path = cache / Path(entry["path"]).name
+    if not path.exists():
+        got = hf_hub_download(repo_id, filename=entry["path"], repo_type="dataset",
+                              revision=revision, local_dir=cache / "hub")
+        shutil.move(got, path)
+    if sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+        path.unlink()
+        raise ValueError(f"Hash mismatch: {entry['path']}")
+
+
+def download(repo_id: str, revision: str, shots: list[dict], cache: Path, threads: int = 8) -> None:
+    from concurrent.futures import ThreadPoolExecutor
     cache.mkdir(parents=True, exist_ok=True)
-    for k, entry in enumerate(shots, 1):
-        path = cache / Path(entry["path"]).name
-        if not path.exists():
-            got = hf_hub_download(repo_id, filename=entry["path"], repo_type="dataset",
-                                  revision=revision, local_dir=cache / "hub")
-            shutil.move(got, path)
-        if sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
-            raise ValueError(f"Hash mismatch: {entry['path']}")
-        if k % 100 == 0 or k == len(shots):
-            print(f"{k}/{len(shots)} verified", flush=True)
+    with ThreadPoolExecutor(threads) as pool:
+        for k, _ in enumerate(pool.map(lambda e: fetch_one(repo_id, revision, e, cache), shots), 1):
+            if k % 100 == 0 or k == len(shots):
+                print(f"{k}/{len(shots)} verified", flush=True)
 
 
 def check_public() -> None:
