@@ -18,7 +18,7 @@ Submissions need the human: a fresh quota check, and confirmation of their uploa
 ```bash
 REV=<40-char Final commit>
 .venv/bin/python -B -m participant.final_manifest --config diii_d_private_test --revision $REV \
-  --expected 879 --out run_data/final/d3d --download-to run_data/final/d3d-cache
+  --expected 879 --out run_data/final/d3d --download-to run_data/final/d3d-cache/raw
 .venv/bin/python -B -m participant.final_manifest --config mast_private_test --revision $REV \
   --expected 1205 --out run_data/final/mast
 cp run_data/final/mast/manifest.json run_data/final/mast/data.json

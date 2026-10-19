@@ -56,3 +56,24 @@ fix. Rows from "+ Te exponent 0.75" down are each added on top of 0.25 + ALLg.
 
 **Leaderboard status:** none of this was scored in Development, which closed on 18 Oct at
 00:00 UTC.
+
+## 4. Te exponent and anchor scan (80 shots; mean of the plasma CC and coil metrics)
+
+| Configuration (all solenoid 0.25 + ALLg) | Mean plasma R² |
+|---|---:|
+| Exponent 1.0 | 0.761 |
+| Exponent 0.75 | 0.779 |
+| Exponent 0.5 | 0.780 |
+| Exponent 0.75 + anchor correction | 0.781 |
+
+The exponent plateaus below 0.75.
+
+## Final submissions (blind; the best MAST S and DIII-D S across scored submissions count)
+
+DIII-D is the same in all three: the incumbent ensemble, `run_data/final/d3d-pred`.
+
+| # | MAST configuration | Basis |
+|---|---|---|
+| 1 | Solenoid 0.5, union class, exponent 1.0, βN `flux-kin` | Development 030 recipe |
+| 2 | Solenoid 0.25, passive ALLg, exponent 0.75, βN `flux-kin` | Best measured-magnetics match |
+| 3 | Submission 2 + Te-symmetry anchor correction | Best combined harness score |
