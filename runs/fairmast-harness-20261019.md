@@ -110,3 +110,22 @@ doubled solenoid, the CCBV gain is 0.44.
 
 **Decision: the last Final slot (submission 3) is `--passive ALLg --te-power 0.75`** at the
 default solenoid 0.5. The inner wall and Te^0.5 do not change anything measurably.
+
+## 6. Round 2 on the same 80 shots (passive ALLg, Te^0.75 base)
+
+Probe columns give R² as mean / median.
+
+| Variant | Plasma loops CC | Coils | CCBV | OBV | OBR |
+|---|---:|---:|---|---|---|
+| **Base (submission 3)** | 0.784 | 0.773 | **0.71 / 0.81** | 0.79 / 0.76 | 0.79 / 0.95 |
+| + anchor correction | 0.772 | 0.790 | 0.70 / 0.79 | 0.82 / 0.78 | 0.77 / 0.96 |
+| Passive ALL (rodgr blocks as steel) | 0.812 | 0.771 | **−0.08 / 0.46** | 0.78 / 0.76 | 0.80 / 0.94 |
+| Passive VC (incl. rodgr) | 0.805 | 0.764 | **−0.04 / 0.57** | 0.74 / 0.70 | 0.85 / 0.89 |
+| + edge (nobz) | 0.785 | 0.766 | 0.71 / 0.81 | 0.78 / 0.76 | 0.83 / 0.96 |
+
+**Reading:**
+- The centre-column probes reject steel rodgr blocks. Graphite armour (ALLg) is
+  consistent with them.
+- The anchor correction and the edge option are mixed or neutral.
+- The base stays. Next: confirmation on a disjoint 80-shot holdout
+  (`run_data/fairmast/holdout80.json`).
