@@ -3,7 +3,9 @@
 The output matches run_data/mast-001/inputs/*.npz, so research.mast_gs_robust runs unchanged
 with MAST_DATA_DIR=<out>. Conventions (checked against the release, 18 October):
 - PF currents in kA. Release P2 = P2 inner feed + outer feed (level 2 is already x turns);
-  the release solenoid is 2x the level-2 solenoid (forum; FAIR-MAST mapping scale 0.5).
+  the release solenoid equals the level-2 solenoid (checked 19 Oct: median max|SOL| 45.2 vs
+  45.6 kA, pre-breakdown 31.4 vs 31.8 kA). The forum's "2x level 2" does not hold here; the
+  converter used 2x until 19 Oct, so harness runs labelled sol_scale s are physically 2s.
 - All times in ms. Thomson: level-2 midplane Te(R, t) with a ghost channel 0, as released.
 - Coil geometry, grid and units come from one release shot (same machine).
 - Frames: Thomson times with |Ip| > 30% of its maximum.
@@ -29,7 +31,7 @@ def convert(d, template):
     row.update(source="MAST", magnetics_time=t.astype(np.float32),
                magnetics_plasma_current=ip,
                magnetics_tf_current=np.interp(t, d["tf_time"] * 1000, d["tf_current"]) / 1000,
-               magnetics_sol_current=2 * ch["SOL"])
+               magnetics_sol_current=ch["SOL"])
     for s in ("l", "u"):
         S = s.upper()
         row[f"magnetics_p2{s}_current"] = ch[f"P2I{S} FEED"] + ch[f"P2O{S} FEED"]

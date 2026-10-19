@@ -74,6 +74,7 @@ def main():
     a = argparse.ArgumentParser()
     a.add_argument("runs", nargs="+", type=Path)
     a.add_argument("--data", type=Path, default=Path("run_data/fairmast/data"))
+    a.add_argument("--probes", action="store_true")
     args = a.parse_args()
     for run in args.runs:
         pred, ext, meas, names = loop_values(run, args.data)
@@ -83,6 +84,52 @@ def main():
         mean = lambda d, pre: np.nanmean([v for k, v in d.items() if k.startswith(pre) and k not in broken])
         print(f"{run.name:16s} frames {len(pred):5d} | total CC {mean(total, 'CC'):.3f} coils {mean(total, 'P'):.3f}"
               f" | plasma CC {mean(plasma, 'CC'):.3f} coils {mean(plasma, 'P'):.3f}")
+        if args.probes:
+            pr = probe_report(run, args.data)
+            print("    probes " + " | ".join(f"{k}: R2 {v[0]:.3f} corr {v[1]:+.3f} (n={v[2]})" for k, v in pr.items()))
+
+
+
+def probe_values(run, data, probes=Path("run_data/fairmast/probes")):
+    """Predicted vs measured pickup-coil fields: CCBV (Bz, centre column), OBV (Bz) and OBR (BR),
+    outboard. B_R = -(1/R) dpsi/dZ, B_Z = (1/R) dpsi/dR (psi in Wb/rad)."""
+    shots = json.loads((data / "data.json").read_text())["shots"]
+    out = {"ccbv": [], "obv": [], "obr": []}
+    for i, e in enumerate(shots):
+        f, pf = run / "shots" / f"{i:04d}.npz", probes / f"{e['shot']}.npz"
+        if not (f.exists() and pf.exists()):
+            continue
+        name = Path(e["path"]).stem
+        row = np.load(data / "inputs" / f"{name}.npz")
+        frames = np.load(data / "magnetics" / f"{name}.npz")["frames_ms"] / 1000
+        pr = np.load(pf)
+        r, z = row["efit_grid_R"], row["efit_grid_Z"]
+        psi = np.load(f)["psirz"].astype(float)
+        dpsi_dz, dpsi_dr = np.gradient(psi, z, r, axis=(1, 2))
+        for arr, comp in (("ccbv", "z"), ("obv", "z"), ("obr", "r")):
+            geo = [g.lower() for g in pr[f"{arr}_geometry_channel"]]
+            idx = [geo.index(c.lower()) for c in pr[f"{arr}_channel"]]
+            pr_r, pr_z = pr[f"{arr}_r"][idx], pr[f"{arr}_z"][idx]
+            rows, cols = (pr_z - z[0]) / (z[1] - z[0]), (pr_r - r[0]) / (r[1] - r[0])
+            grad = dpsi_dr if comp == "z" else dpsi_dz
+            sign = 1.0 if comp == "z" else -1.0
+            pred = np.array([sign * map_coordinates(g, [rows, cols], order=1) / pr_r for g in grad])
+            meas = np.array([np.interp(frames, pr["time"], ch) for ch in pr[f"{arr}_field"]]).T
+            bad = ~np.isfinite(meas).all(axis=0) | (np.nanstd(meas, axis=0) < 1e-4)
+            meas[:, bad] = np.nan
+            out[arr].append((pred, meas))
+    return {k: tuple(np.concatenate(x) for x in zip(*v)) for k, v in out.items() if v}
+
+
+def probe_report(run, data):
+    res = {}
+    for arr, (pred, meas) in probe_values(run, data).items():
+        per = [r2(pred[:, j], meas[:, j]) for j in range(pred.shape[1])]
+        good = [v for v in per if v > -5]
+        corr = np.nanmedian([np.corrcoef(pred[np.isfinite(meas[:, j]), j], meas[np.isfinite(meas[:, j]), j])[0, 1]
+                             for j in range(pred.shape[1]) if np.isfinite(meas[:, j]).sum() > 10])
+        res[arr] = (np.nanmean(good) if good else np.nan, corr, len(good))
+    return res
 
 
 if __name__ == "__main__":

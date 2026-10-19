@@ -65,7 +65,7 @@ class RunConfig:
     te_power: float = 1.0
     passive: str | None = None
     anchor_prior: str | None = None
-    sol_scale: float = SOL_SCALE  # per-element share of sol_current (flux loops: 0.25)
+    sol_scale: float = SOL_SCALE  # per-element share of sol_current (0.5: official feedback + flux loops)
 
 
 def te_axis(pr, te):

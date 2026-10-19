@@ -1,5 +1,16 @@
 # Magnetic validation harness — 18–19 October 2026
 
+> **Correction (19 Oct, code review).** The converter doubled the solenoid current. The
+> release `sol_current` equals FAIR-MAST level 2: the medians agree within 1%, against 1.01
+> for P4. Every "solenoid s" below is therefore **physically 2s**:
+> - the "0.25" runs are the correct 0.5 × release;
+> - the "0.5" runs are 1.0.
+>
+> The vacuum fit (0.49–0.50 × level 2 per element) confirms the original
+> `SOL_SCALE = 0.5`. It does not support 0.25. Final submission 2 (`--sol-scale 0.25` on
+> release data) used half the correct solenoid. The variant ranking holds at the correct
+> scale: passive ALLg helps, Te exponent 0.75 helps, the vertical class helps.
+
 **Data:** FAIR-MAST level 2 for 301 non-release MAST shots (seed 20261018, shots 27000–30470).
 Only coil currents, Ip, TF, flux loops and Thomson were read; never `equilibrium` or EFIT
 products. The human approved the download on 18 October.
