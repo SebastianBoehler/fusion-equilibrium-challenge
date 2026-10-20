@@ -26,6 +26,7 @@ class Profile:
     iterations: int = 40
     relax: float = 0.5
     te_power: float = 1.5  # kinetic profile J ~ Te^te_power (1.5 = Spitzer)
+    edge_frac: float = 0.0  # flat share of the current shape (finite edge current; 0 = off)
     beta0_range: tuple = (-1.0, 4.0)
     vertical: str = "force"  # "force": zero external vertical force; "zero": centroid at Z=0
     efit_c: float | None = None  # if set: g = (1 - psiN)(1 + c psiN), the Lao n=1 family
@@ -184,6 +185,8 @@ def solve(phi_ext, ip, r, z, allowed, profile=Profile(), *, edges=None, axis_r=N
             shape_fn = np.where(region, np.clip((1 - psin) * (1 + profile.efit_c * psin), 0, None), 0)
         if shape_fn is None:
             shape_fn = np.where(region, (1 - psin ** profile.alpha_m) ** profile.alpha_n, 0)
+        if profile.edge_frac > 0 and shape_fn.max() > 0:
+            shape_fn = (1 - profile.edge_frac) * shape_fn / shape_fn.max() + profile.edge_frac * region
         rr = r[None, :]
         new = to_cells(shape_fn * (beta0 * rr / r0 + (1 - beta0) * r0 / rr))
         if new.sum() <= 0:

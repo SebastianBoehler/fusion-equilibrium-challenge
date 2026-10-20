@@ -65,6 +65,7 @@ class RunConfig:
     te_power: float = 1.0
     passive: str | None = None
     anchor_prior: str | None = None
+    edge_current: float = 0.0  # flat share of the current shape (gs_picard Profile.edge_frac)
     sol_scale: float = SOL_SCALE  # per-element share of sol_current (0.5: official feedback + flux loops)
 
 
@@ -218,6 +219,8 @@ def run_shot(task):
         if good.sum() >= 3:
             edges = list(fill(raw, good, 5))
     profile = ZERO if cfg.te_power == 1.0 else replace(ZERO, te_power=cfg.te_power)
+    if cfg.edge_current:
+        profile = replace(profile, edge_frac=cfg.edge_current)
     fvac = np.abs(currents[:, SIGNALS.index("tf_current")]) * 1000 * MU0 * TF_TURNS / (2 * np.pi)
     psi, kept = [], []
     beta0s, betan_share = np.full(len(ip), np.nan), np.full(len(ip), np.nan)
@@ -264,9 +267,11 @@ def main() -> None:
     p.add_argument("--te-power", type=float, default=1.0)
     p.add_argument("--passive", choices=("V", "VC", "ALL", "ALLg", "ALLgf", "OUT"))
     p.add_argument("--sol-scale", type=float, default=SOL_SCALE)
+    p.add_argument("--edge-current", type=float, default=0.0)
     a = p.parse_args()
-    cfg = RunConfig(a.vertical, a.inner, not a.no_smooth_anchor, a.edge, a.edge_nobz,
-                    a.te_power, a.passive, a.anchor_prior, a.sol_scale)
+    cfg = RunConfig(vertical=a.vertical, inner=a.inner, smooth_anchor=not a.no_smooth_anchor,
+                    edge=a.edge, edge_nobz=a.edge_nobz, te_power=a.te_power, passive=a.passive,
+                    anchor_prior=a.anchor_prior, edge_current=a.edge_current, sol_scale=a.sol_scale)
     shots = json.loads((DATA / "data.json").read_text())["shots"]
     indices = list(range(len(shots))) if a.shots == "all" else json.loads(Path(a.shots).read_text())
     started, metas = time.monotonic(), []
