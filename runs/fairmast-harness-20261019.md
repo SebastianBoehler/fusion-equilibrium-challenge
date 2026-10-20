@@ -129,3 +129,24 @@ Probe columns give R² as mean / median.
 - The anchor correction and the edge option are mixed or neutral.
 - The base stays. Next: confirmation on a disjoint 80-shot holdout
   (`run_data/fairmast/holdout80.json`).
+
+## 7. Holdout confirmation and the fine passive model (20 Oct)
+
+Disjoint 80-shot holdout (6,996 frames). Probe columns give R² as mean / median.
+
+| Variant | Plasma loops CC | Coils | CCBV | OBV | OBR |
+|---|---:|---:|---|---|---|
+| Submission 1 config | 0.53 | 0.53 | 0.66 / 0.72 | 0.08 / 0.20 | 0.67 / 0.76 |
+| Passive ALLg, Te^0.75 | 0.75 | 0.81 | 0.62 / 0.71 | 0.73 / 0.71 | 0.79 / 0.85 |
+| **Passive ALLgf (pieces ≤ 1 cm), Te^0.75** | **0.76** | **0.81** | **0.75 / 0.78** | 0.73 / 0.71 | 0.79 / 0.85 |
+
+**Ablation OUT** (no centre-column structure, tuning set): CCBV 0.88 / 0.91, but plasma
+loops CC fall to 0.69. The Inconel tube's current is real; the earlier CCBV deficit was a
+discretization artefact. The tube sits 6.5 mm from the probes, with 8 cm filament pieces.
+
+**ALLgf on the tuning set:** CCBV 0.86 / 0.88; all other metrics are unchanged against
+ALLg.
+
+**Final candidate:** `run_data/final/submission-3-v5/fusion-final-3.zip` (ALLgf, Te^0.75,
+solenoid 0.5, βN `flux-kin`). It is validated and tagged `final-submission-3-v5`. The
+earlier ALLg build in `run_data/final/submission-3/` is the fallback.
