@@ -150,3 +150,23 @@ ALLg.
 **Final candidate:** `run_data/final/submission-3-v5/fusion-final-3.zip` (ALLgf, Te^0.75,
 solenoid 0.5, βN `flux-kin`). It is validated and tagged `final-submission-3-v5`. The
 earlier ALLg build in `run_data/final/submission-3/` is the fallback.
+
+## 8. Edge current and per-frame peaking (20 Oct; tuning set; base ALLgf, Te^0.75)
+
+Probe columns give R² as mean / median.
+
+| Variant | Plasma loops CC | Coils | CCBV | OBV | OBR |
+|---|---:|---:|---|---|---|
+| **Base (submission 3 v5)** | 0.786 | 0.773 | 0.86 / 0.88 | 0.79 / 0.76 | 0.79 / 0.95 |
+| Edge-current share 0.1 | 0.792 | 0.773 | 0.84 / 0.87 | 0.79 / 0.78 | 0.88 / 0.95 |
+| Edge-current share 0.2 | 0.778 | 0.778 | 0.81 / 0.86 | 0.78 / 0.78 | 0.88 / 0.95 |
+| Te^0.5 | 0.786 | 0.775 | 0.83 / 0.87 | 0.78 / 0.78 | 0.82 / 0.94 |
+| Te^1.0 | 0.768 | 0.756 | 0.85 / 0.87 | 0.79 / 0.74 | 0.74 / 0.95 |
+| Per-frame peaking selection* | 0.784 | 0.776 | 0.86 / 0.89 | 0.80 / 0.76 | 0.80 / 0.96 |
+
+\* `research/peaking_select.py` picks Te^0.5/0.75/1.0 per frame so that the outboard LCFS
+matches the Thomson 30 eV edge. Choices: 1,126 / 2,928 / 3,311 frames.
+
+**Reading:** all differences are below 0.01 on the loops and mixed on the probes, so none
+is adopted. The labels likely use a zero-edge-current profile (EFIT++ Dirichlet
+convention), which argues against the edge current. Submission 3 stays the v5 build.
