@@ -191,3 +191,28 @@ fraction to 0.34; this configuration does not. The shifts move toward the publis
 qualitative MAST picture (mostly diverted, κ ≈ 1.9–2.0, l_i ≈ 0.85–1.0); those
 published values are context only, never used for fitting. This is a screen, not a
 ranking: the scored effect is unknown until the Final closes.
+
+## 10. Ip-ramp profile rule and magnetic vertical-position check (20 Oct)
+
+**Residuals by phase** (submission-3 configuration, tuning set): the relative plasma-loop
+residual is largest in ramp-down (dIp/dt < −0.2 %/ms: 0.145, 22% of SSE) and at low Ip.
+Flat-top sits at 0.09–0.10.
+
+**Ip-ramp rule:** Te^0.5 in ramp-up / 0.75 in flat-top / 1.5 or 1.0 in ramp-down, by
+dIp/dt with thresholds fixed a priori (`research/peaking_select.py --rule dip`).
+- Plasma loops CC: 0.778 / 0.782, against 0.786 for the base.
+- Probes: unchanged.
+- **Not adopted.**
+
+**Vertical position from magnetics** (`research/fairmast_zfit.py`):
+- **Method:** the plasma part was shifted rigidly per frame; the shift minimizing the
+  calibrated CCBV residual was kept.
+- **Result:** our placement is accurate for most frames (dz median 0, p10–p90 ±0.8 cm on
+  tuning).
+- **Outliers:** 1 of 16 usable tuning shots and 4 of 15 usable holdout shots.
+  - Two Z = 0 shots with m6 = 2.5 and 3.6 (just below the P6 threshold of 4) want ≥12 cm
+    lower.
+  - Two shifted-class shots want 4–6 cm higher, i.e. they are over-shifted.
+- Coil features correlate only weakly with dz (|r| < 0.19).
+- **Too few shots to retune** the threshold or magnitude without overfitting. Recorded
+  as a lead only.
