@@ -170,3 +170,24 @@ matches the Thomson 30 eV edge. Choices: 1,126 / 2,928 / 3,311 frames.
 **Reading:** all differences are below 0.01 on the loops and mixed on the probes, so none
 is adopted. The labels likely use a zero-edge-current profile (EFIT++ Dirichlet
 convention), which argues against the edge current. Submission 3 stays the v5 build.
+
+## 9. Public-test label-free screen of the submission-3 configuration (20 Oct)
+
+Run `run_data/mast-057L`: ALLgf, Te^0.75, solenoid 0.5, on the public MAST inputs.
+Screened with `research/label_free_screen.py` on 10% of shots, against the scored 030 flux
+(`run_data/mast-044`, official 0.775).
+
+| Screen | 030 flux | Submission 3 config |
+|---|---:|---:|
+| X-point fraction | 0.81 | 0.89 |
+| κ p10 / 50 / 90 | 1.63 / 1.83 / 2.00 | 1.63 / 1.93 / 2.12 |
+| l_i p10 / 50 / 90 | 0.87 / 1.09 / 1.36 | 0.77 / 0.90 / 1.17 |
+| Te mismatch p50 | 0.0765 | 0.0766 |
+| Edge bias / mean deviation | −1.7 / 7.9 cm | −2.3 / 8.2 cm |
+| Plausible frames | 99.85% | 99.30% |
+
+**Reading:** nothing pathological. The 0.25-solenoid variant had collapsed the diverted
+fraction to 0.34; this configuration does not. The shifts move toward the published
+qualitative MAST picture (mostly diverted, κ ≈ 1.9–2.0, l_i ≈ 0.85–1.0); those
+published values are context only, never used for fitting. This is a screen, not a
+ranking: the scored effect is unknown until the Final closes.
