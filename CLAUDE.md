@@ -1,7 +1,9 @@
 # Repository instructions for Claude
 
 NeurIPS 2026 Fusion Equilibrium Challenge (Codabench 17739). Award 1: DIII-D composite S.
-Award 2: G = S_MAST / best S_DIII-D (needs DIII-D S ≥ 0.85). Read first:
+Award 2: G = S_MAST / best S_DIII-D (needs DIII-D S ≥ 0.85).
+**Start with [HANDOFF-20261021](docs/handoff/HANDOFF-20261021.md)** (Final state, evidence,
+pitfalls). Then read:
 [current handoff](docs/handoff/CLAUDE_HANDOFF.md), [code map](docs/handoff/CODE_MAP.md),
 [Final runbook](runs/final-runbook.md), [forum brief](docs/forum-brief-20261017.md).
 
