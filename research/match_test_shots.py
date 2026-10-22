@@ -19,7 +19,8 @@ def load_index(index_dir):
     parts = [np.load(f) for f in sorted(Path(index_dir).glob("chunk*.npz"))]
     shots = np.concatenate([p["shots"] for p in parts])
     fp = np.concatenate([p["fp"] for p in parts]).astype(float)
-    return shots, fp, parts[0]["grid"]
+    shots, first = np.unique(shots, return_index=True)        # overlapping index runs
+    return shots, fp[first], parts[0]["grid"]
 
 
 def release_fp(row, grid):
