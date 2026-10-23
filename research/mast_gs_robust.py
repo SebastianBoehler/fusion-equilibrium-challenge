@@ -196,7 +196,9 @@ def run_shot(task):
     points = [(pr[ok], pz[ok], te[t][ok]) if ok.sum() >= 5 else None
               for t, ok in enumerate(np.isfinite(te))]
     fallback = fallback_psi(row, index, cfg.sol_scale)
-    shifted = cfg.vertical == "config-union" and shifted_class(currents, ip)
+    # Optional per-shot override (inputs rebuilt with other coil currents keep the release class)
+    override = row.get("shifted_override")
+    shifted = cfg.vertical == "config-union" and (bool(override) if override is not None else shifted_class(currents, ip))
     z_targets = [0.0 if cfg.vertical == "config-union" else None] * len(ip)
     if shifted:  # pass 1: force balance; smoothed centroid heights, forced downward
         heights = np.full(len(ip), np.nan)

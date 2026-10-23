@@ -20,9 +20,12 @@ GROUPS = ("CC", "P", "ccbv", "obv", "obr")
 
 
 def one(job):
-    data, mag_dir, out, runs, i, e, m = job
+    data, mag_dir, out, runs, i, e, m, fallback = job
     target = out / "shots" / f"{i:04d}.npz"
     base = Path(runs[0]) / "shots" / f"{i:04d}.npz"
+    if not base.exists() and fallback:          # shots not re-solved (e.g. unmatched in candidate L2)
+        shutil.copyfile(Path(fallback) / "shots" / f"{i:04d}.npz", target)
+        return i, "fallback", None
     name = Path(e["path"]).stem
     mf = mag_dir / "magnetics" / f"{name}.npz"
     if m is None or not mf.exists() or not all((Path(r) / "shots" / f"{i:04d}.npz").exists() for r in runs):
@@ -66,12 +69,13 @@ def main():
     a.add_argument("out", type=Path); a.add_argument("runs", nargs="+")
     a.add_argument("--max-dist", type=float, default=0.005); a.add_argument("--workers", type=int, default=12)
     a.add_argument("--only", type=Path, help="JSON list of shot indices (smoke tests)")
+    a.add_argument("--fallback", help="solve dir for shots missing from the base run")
     args = a.parse_args()
     (args.out / "shots").mkdir(parents=True, exist_ok=False)
     shots = json.loads((args.data / "data.json").read_text())["shots"]
     match = {m["i"]: m for m in json.loads(args.match.read_text()) if m["dist"] <= args.max_dist}
     only = set(json.loads(args.only.read_text())) if args.only else None
-    jobs = [(args.data, args.mag, args.out, args.runs, i, e, match.get(i)) for i, e in enumerate(shots)
+    jobs = [(args.data, args.mag, args.out, args.runs, i, e, match.get(i), args.fallback) for i, e in enumerate(shots)
             if only is None or i in only]
     status, fits = {}, []
     with ProcessPoolExecutor(args.workers) as ex:
