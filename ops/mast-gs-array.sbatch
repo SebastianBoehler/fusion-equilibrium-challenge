@@ -1,7 +1,7 @@
 #!/bin/bash
+# Site-specific: set --account, --partition and --qos for your cluster on the sbatch command line.
 #SBATCH --job-name=mast-gs
-#SBATCH --partition=cpu-galvani
-#SBATCH --qos=normal
+#SBATCH --partition=cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
@@ -10,10 +10,10 @@
 #SBATCH --no-requeue
 #SBATCH --output=logs/%x-%A_%a.out
 # Sharded MAST kinetic-GS run: array task k solves shards/<run>/shard-<k>.json.
-# Usage: sbatch --array=0-3 --export=ALL,RUN=<name>,ARGS="<mast_gs_robust flags>" mast-gs-array.sbatch
+# Usage: sbatch --array=0-3 --export=ALL,ROOT=<work dir with repo/ and shards/>,RUN=<name>,ARGS="<mast_gs_robust flags>" mast-gs-array.sbatch
 set -euo pipefail
-root=<cluster-work>/fusion/mast-gs-20261017
-python=<cluster-work>/fusion/nn-008/venv/bin/python
+root=${ROOT:?set ROOT to the work dir holding repo/ and shards/}
+python=${PYTHON:-$root/repo/.venv/bin/python}
 cd "$root/repo"
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 shard="$root/shards/$RUN/shard-$SLURM_ARRAY_TASK_ID.json"

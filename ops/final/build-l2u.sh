@@ -2,7 +2,7 @@
 # Candidate L2-u (23 Oct): level-2-current re-solve ONLY for matched shots of the centred (Z=0) class;
 # shifted-class and unmatched shots = v5 exactly (inputs and flux). Loops: L2 better on 78% of centred, 41% of shifted.
 set -e
-cd .
+cd "${0:A:h}/../.."
 PY=.venv/bin/python
 rm -rf run_data/final/mast-l2u run_data/final/mast-solve-l2u
 mkdir -p run_data/final/mast-l2u/inputs run_data/final/mast-solve-l2u/shots

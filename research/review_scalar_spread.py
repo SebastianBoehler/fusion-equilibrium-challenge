@@ -4,7 +4,7 @@ import json, sys, os
 from pathlib import Path
 from multiprocessing import Pool
 import numpy as np
-ROOT = Path(".")
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "vendor/fusion_starter/fusion_scoring"))
 from derive import derive_frame, SCALAR_NAMES
 from lcfs import extract_lcfs

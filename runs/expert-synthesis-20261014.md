@@ -151,12 +151,12 @@ kept on disk.
 - **021b** = 034 flux/q95 (config + anchor smoothing) + βN from its own Te¹ flux: SHA
   `733ef909…6521`.
 
-**Galvani** (`<cluster>`; the human authorized cluster runs on 17 Oct). Root:
-`<cluster-work>/fusion/mast-gs-20261017`.
+**Cluster** (Slurm CPU partition; cluster runs authorized on 17 Oct). Root:
+`<work dir>/mast-gs-20261017`.
 - MAST inputs were downloaded there from HF at the pinned revision with SHA checks (482 s).
 - `research.mast_gs_robust.fallback_psi` recomputes the 004 flux when the archive is absent;
   it is bit-identical to the archive.
-- `ops/mast-gs-array.sbatch` shards a run over 4 × 32-core cpu-galvani nodes.
+- `ops/mast-gs-array.sbatch` shards a run over 4 × 32-core CPU nodes.
 - Submitted: 2973839 (037: Te^0.75 + edge + smooth anchor + config) and 2973844 (035: edge +
   smooth anchor + config). The local 035 run continues as a backup.
 

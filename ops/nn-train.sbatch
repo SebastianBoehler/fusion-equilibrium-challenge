@@ -1,7 +1,7 @@
 #!/bin/bash
+# Site-specific: set --account, --partition and --qos for your cluster on the sbatch command line.
 #SBATCH --job-name=fusion-nn-train
-#SBATCH --partition=a100-galvani
-#SBATCH --qos=normal
+#SBATCH --partition=a100
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1

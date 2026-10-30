@@ -2,7 +2,7 @@
 # Candidate L2 (23 Oct): matched shots re-solved with FAIR-MAST level-2 PF currents (release class frozen),
 # then E2 magnetics TTA; unmatched shots = v5. betaN channel from v5.
 set -e
-cd .
+cd "${0:A:h}/../.."
 until ! pgrep -f "research/fairmast_pf.py" >/dev/null; do sleep 30; done
 echo "pf done $(date)"; ls run_data/final/mast-pf | wc -l
 PY=.venv/bin/python

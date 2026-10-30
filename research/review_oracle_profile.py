@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 import numpy as np
-sys.path.insert(0, ".")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from research.fairmast_harness import loop_values, r2
 D = Path("run_data/fairmast"); data = D / "data2"
 runs = ["d2-v4-ALLgf", "d2-gf-te05", "d2-gf-te10", "d2-gf-te15", "d2-gf-e10", "d2-gf-e20"]

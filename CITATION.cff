@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Fusion Equilibrium Challenge entry: DIII-D MLP ensemble and label-free MAST Grad-Shafranov reconstruction"
+authors:
+  - family-names: Boehler
+    given-names: Sebastian
+repository-code: "https://github.com/SebastianBoehler/fusion-equilibrium-challenge"
+license: MIT
+date-released: 2026-10-30
+keywords:
+  - tokamak
+  - plasma equilibrium
+  - Grad-Shafranov
+  - MAST
+  - DIII-D
+  - NeurIPS 2026 competition

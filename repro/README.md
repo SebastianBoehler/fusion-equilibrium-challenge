@@ -76,10 +76,10 @@ the entrant's direction.
 
 - **Steps:** see `runs/final-runbook.md` step 3: `research.mast_gs_robust`, then
   `research.mast_final`.
-- **Hardware:** about 60–100 min on 12–14 CPU cores (Apple M-series or Galvani CPU nodes).
+- **Hardware:** about 60–100 min on 12–14 CPU cores (Apple M-series or Slurm CPU nodes).
   There is no GPU work.
 - **Determinism:** deterministic given the inputs. Scored public-test runs reproduce bit
-  for bit (`docs/handoff/CODE_MAP.md`).
+  for bit (`docs/code-map.md`).
 
 ## Weights
 

@@ -12,7 +12,7 @@ Importing an analytic helper does not mean the script's `main()` is safe to run 
 | `nn_ensemble_check.py`, `nn_regression_check.py` | Saved-checkpoint scorer comparisons on declared DIII-D subsets |
 | `nn_error_breakdown.py` | Diagnostic analysis, not a unit test |
 
-The MAST runner's bit-identity regression is described in `docs/handoff/CODE_MAP.md`.
+The MAST runner's bit-identity regression is described in `docs/code-map.md`.
 
 The 18 October cleanup removed six checks of the retired ridge pipeline (tag
 `pre-cleanup-20261018`).

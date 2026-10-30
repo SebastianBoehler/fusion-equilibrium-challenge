@@ -1,5 +1,8 @@
 # Final-phase runbook (opens 19 October 2026, 02:00 CEST)
 
+*Written before the Final opened. Section 5 shows the status at that time. The current rebuild
+guide is `repro/README.md`; Final submission 3 used `ops/final/build-l2*.sh` on top of step 3.*
+
 Dataset: `Sophelio/fusion-equilibrium-challenge-final`. Configs: `diii_d_private_test`
 (879 shots) and `mast_private_test` (1,205 shots). At most **three** Final submissions.
 Each needs a reproduction-package reference in the `Code URL` field at submission time.

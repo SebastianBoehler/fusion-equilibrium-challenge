@@ -10,6 +10,5 @@ in `vendor/fusion_starter/LICENSE`; our own code is MIT-licensed in the root `LI
 `fusion_scoring/masks/mast_envelope.npz` (aggregated from label contours); only the
 unmodified scorer uses it, never our MAST prediction path.
 
-The complete initial starter checkout is retained locally in ignored `.journal/`.
 The `upstream` remote retains the organizer history; our `main` has an independent
 participant history.

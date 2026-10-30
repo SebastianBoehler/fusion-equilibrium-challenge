@@ -13,10 +13,11 @@ Dated records. Code they mention may have been removed in the 18 October cleanup
 | `mast-022-gs-picard.md`, `mast-023-024-kinetic.md`, `mast-025-robust.md` | Free-boundary kinetic solver, q95/βN, robust anchors |
 | `mast-official-20261014.md`, `expert-synthesis-20261014.md` | Official results 14–17 Oct, vertical class, efps (corrected) |
 | `code-audit-20261017.md`, `sota-review-20261017.md`, `search-space-review-2026101{7,8}.md` | Audit, literature, search-space reviews; 029/030 results |
-| `final-runbook.md`, `upload-plan-20261018.md` | Final-phase commands; 18 Oct uploads |
+| `fairmast-harness-20261019.md` | Label-free validation on 301 public FAIR-MAST shots |
+| `mag-tta-20261022.md`, `review-20261021.md` | Re-identification, level-2 currents, magnetics TTA; Final submission 3 |
+| `final-runbook.md` | Final-phase commands |
 
-**`archive/`:** earlier work, kept for provenance. It contains assumptions that were later
-superseded. Do not use it as current guidance.
-- The DIII-D ridge, contour, critical, finite and inductance campaigns.
-- Early MAST candidates 001–019.
-- The 7–8 October receipts (`RUNS-legacy.md`) and their protocols.
+Most notes were written by Claude, the AI coding agent, during the campaign. "The human" means
+the author. The earlier campaigns (DIII-D ridge, contour, critical-point, finite and inductance;
+MAST candidates 001–019) and their protocols were in `runs/archive/`. They were removed in the
+open-source cleanup and remain at tag `final-submission-3`.

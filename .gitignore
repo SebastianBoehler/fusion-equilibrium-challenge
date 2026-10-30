@@ -1,16 +1,32 @@
-results/
+# Environments
 .venv/
+.venv-*/
 __pycache__/
 *.pyc
-my_experiments/
+.env
+.env.*
+
+# Data, run evidence and model weights (large; hosted or rebuilt, never committed)
+data/
+run_data/
+results/
+logs/
+*.pt
+*.parquet
+
+# Submission artifacts. push_predictions.py writes a scoped HF read token into
+# manifest.json and zips it into submission_pointer.zip: never commit either.
 submission/
 sample_submission/
-
-# push_predictions.py writes your scoped HF read token into manifest.json and zips it here.
-# Submitted on purpose, but never committed.
 submission_pointer.zip
 manifest.json
-run_data/
+*.zip
+
+# Local notes and tool state
+my_experiments/
 .journal/
 .learnings/
-.venv-fairmast/
+.claude/settings.local.json
+.DS_Store
+.idea/
+.vscode/
