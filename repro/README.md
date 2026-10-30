@@ -83,6 +83,6 @@ the entrant's direction.
 
 ## Weights
 
-The 22 `model.pt` files (about 2.7 GB, each over 100 MB) are to be hosted with SHA256 hashes. The host is a pending human decision. Their hashes are in `nn_members.json` and `nn_members_d1.json`.
+The 22 `model.pt` files (about 2.7 GB, each over 100 MB) are not hosted publicly. Their SHA256 hashes are in `nn_members.json` and `nn_members_d1.json`.
 
 **MAST Final submission 3 (L2-u) rebuild:** `ops/final/build-l2.sh` (base re-solve with level-2 currents; its TTA tail is not used) and then `ops/final/build-l2u.sh`. Both are recorded in `runs/mag-tta-20261022.md`, and they need the FAIR-MAST `pf_active` and `magnetics` downloads (`research/fairmast_pf.py`, `research/fairmast_test_magnetics.py`).

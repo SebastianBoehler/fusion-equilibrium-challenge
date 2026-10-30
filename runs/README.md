@@ -19,5 +19,5 @@ Dated records. Code they mention may have been removed in the 18 October cleanup
 
 Most notes were written by Claude, the AI coding agent, during the campaign. "The human" means
 the author. The earlier campaigns (DIII-D ridge, contour, critical-point, finite and inductance;
-MAST candidates 001–019) and their protocols were in `runs/archive/`. They were removed in the
-open-source cleanup and remain at tag `final-submission-3`.
+MAST candidates 001–019) and their protocols were in `runs/archive/`. They were removed before
+publication.

@@ -87,10 +87,9 @@ in `repro/README.md`.
 | Stage | DIII-D S | MAST S | G | Place |
 |---|---:|---:|---:|---|
 | Development leaderboard (18 Oct, entry 030) | 0.9951 | 0.775 | 0.779 | 11 / 50 (G) |
-| Final standings (provisional, 30 Oct) | not published | not published | not published | Challenge 1: 19 / 58, Challenge 2: 16 / 46 |
+| Final standings (29 Oct) | n/a | n/a | n/a | Challenge 1: 19 / 58, Challenge 2: 16 / 46 |
 
-The organizers had not published Final scores at the time of writing. Places may change
-after their reproduction review of the top entries.
+The organizers published the Final standings as places only, without scores.
 
 **Where the MAST gap was.** The flux R² was close to the leaders (0.984 vs about 0.995).
 The flux-map consistency score was far below them (0.40 vs about 0.9). So were the shape
